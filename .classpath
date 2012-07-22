@@ -26,7 +26,6 @@
   <classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/commons-discovery-0.4.jar"></classpathentry>
   <classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/ontocat-0.9.7.6.jar"></classpathentry>
   <classpathentry exported="true" kind="lib" path="WebContent/WEB-INF/lib/simplecaptcha-1.2.1.jar"></classpathentry>
-  <classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"></classpathentry>
   <classpathentry kind="output" path="build/classes"></classpathentry>
   <classpathentry kind="src" path="apps/animaldb"></classpathentry>
   <classpathentry kind="src" path="modules/auth"></classpathentry>
