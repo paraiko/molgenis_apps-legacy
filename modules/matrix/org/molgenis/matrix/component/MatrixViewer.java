@@ -687,7 +687,7 @@ public class MatrixViewer extends HtmlWidget
 		divContents += "<div style=\"clear: both; vertical-align:middle\">Add/remove columns:";
 		divContents += measurementChooser.render();
 		divContents += new ActionInput(UPDATECOLHEADERFILTER, "", "Update").render();
-		divContents += new ActionInput(ADDALLCOLHEADERFILTER, "", "Add all").render();
+		//divContents += new ActionInput(ADDALLCOLHEADERFILTER, "", "Add all").render();
 		//divContents += new ActionInput(REMALLCOLHEADERFILTER, "", "Remove all").render();
 		divContents += "</div></div>";
 		return divContents;
