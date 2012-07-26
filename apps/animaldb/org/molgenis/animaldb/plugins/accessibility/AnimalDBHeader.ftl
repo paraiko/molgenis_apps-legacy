@@ -28,7 +28,7 @@
 	<div id=logo container style="width:100%; height:54px">
 		<div style="float:left; margin-top:3px; margin-bottom:2px">
 			<a href="http://www.animaldb.org" target="_blank"><img src="res/img/rug_fmns_animaldb_header_logo.png" width="620px" height="49px"></a>
-			<strong> DEMO system!</strong>
+			<strong> DEMO!</strong>
 		</div>
 		
 		<div style="float:right">
