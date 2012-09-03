@@ -81,6 +81,23 @@ public class SearchService extends MolgenisVariantService
 		}
 	}
 
+	public List<String> getAllVariantTypes()
+	{
+		try
+		{
+			String sql = "SELECT DISTINCT type_ FROM Variant";
+			TypedQuery<String> query = this.em.createQuery(sql, String.class);
+			List<String> typeList = query.getResultList();
+			
+			return typeList;
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			throw new SearchServiceException(e.getMessage());
+		}
+	}
+
 	/**
 	 * Get all exons sorted by their position
 	 * @return list of ExonDTOs
@@ -830,7 +847,29 @@ public class SearchService extends MolgenisVariantService
 
 	public List<MutationSummaryDTO> findMutationsByDomainId(Integer domainId)
 	{
-		// TODO Auto-generated method stub
-		return new ArrayList<MutationSummaryDTO>();
+		try
+		{
+			ProteinDomain proteinDomain = this.db.findById(ProteinDomain.class, domainId);
+
+			org.molgenis.framework.db.Query<Variant> query = this.db.query(Variant.class);
+			if ("-1".equals(proteinDomain.getStrand()))
+			{
+				query = query.lessOrEqual(Variant.STARTGDNA, proteinDomain.getStartGdna());
+				query = query.greaterOrEqual(Variant.ENDGDNA, proteinDomain.getEndGdna());
+			}
+			else if ("1".equals(proteinDomain.getStrand()))
+			{
+				query = query.greaterOrEqual(Variant.STARTGDNA, proteinDomain.getStartGdna());
+				query = query.lessOrEqual(Variant.ENDGDNA, proteinDomain.getEndGdna());
+			}
+			List<Variant> result = query.find();
+			
+			return this.variantListToMutationSummaryDTOList(result);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			throw new SearchServiceException(e.getMessage());
+		}
 	}
 }
