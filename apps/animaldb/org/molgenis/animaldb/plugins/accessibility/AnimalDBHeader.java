@@ -34,7 +34,6 @@ import app.FillMetadata;
  */
 public class AnimalDBHeader extends PluginModel<Entity> {
 	private String feedback = null;
-	private String FullUserName = null;
 	private static final long serialVersionUID = 4701628601897969977L;
 
 	public AnimalDBHeader(String name, ScreenController<?> parent) {
