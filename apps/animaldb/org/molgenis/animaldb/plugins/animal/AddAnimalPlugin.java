@@ -337,17 +337,18 @@ public class AddAnimalPlugin extends EasyPluginController {
 
 		// Make all protocol applications
 		List<String> protocolNameList = new ArrayList<String>();
-		protocolNameList.add("SetActive");
-		protocolNameList.add("SetSpecies");
-		protocolNameList.add("SetSex");
-		protocolNameList.add("SetAnimalType");
-		protocolNameList.add("SetSource");
-		protocolNameList.add("SetBackground");
-		protocolNameList.add("SetLine");
-		protocolNameList.add("SetGenotype");
-		protocolNameList.add("SetDateOfBirth");
-		protocolNameList.add("SetResponsibleResearcher");
-		protocolNameList.add("SetLocation");
+		protocolNameList.add("SetActive"); // 0
+		protocolNameList.add("SetSpecies");// 1
+		protocolNameList.add("SetSex"); // 2
+		protocolNameList.add("SetAnimalType"); // 3
+		protocolNameList.add("SetSource"); // 4
+		protocolNameList.add("SetBackground"); // 5
+		protocolNameList.add("SetLine"); // 6
+		protocolNameList.add("SetGenotype"); // 7
+		protocolNameList.add("SetDateOfBirth"); // 8
+		protocolNameList.add("SetResponsibleResearcher"); // 9
+		protocolNameList.add("SetLocation"); // 10
+		protocolNameList.add("SetIsWritableByUser"); // 11
 		for (int j = 0; j < 11; j++) {
 			ProtocolApplication newApp = ct.createProtocolApplication(invName,
 					protocolNameList.get(j));
@@ -356,21 +357,23 @@ public class AddAnimalPlugin extends EasyPluginController {
 		db.add(appsToAddList);
 		// Get all measurements
 		List<String> featureNameList = new ArrayList<String>();
-		featureNameList.add("Active");
-		featureNameList.add("Species");
-		featureNameList.add("Sex");
-		featureNameList.add("AnimalType");
-		featureNameList.add("Source");
-		featureNameList.add("Background");
-		featureNameList.add("Line");
-		featureNameList.add("GeneModification");
-		featureNameList.add("GeneState");
-		featureNameList.add("DateOfBirth");
-		featureNameList.add("ResponsibleResearcher");
-		featureNameList.add("Location");
+		featureNameList.add("Active"); // 0
+		featureNameList.add("Species"); // 1
+		featureNameList.add("Sex"); // 2
+		featureNameList.add("AnimalType"); // 3
+		featureNameList.add("Source"); // 4
+		featureNameList.add("Background"); // 5
+		featureNameList.add("Line"); // 6
+		featureNameList.add("GeneModification"); // 7
+		featureNameList.add("GeneState"); // 8
+		featureNameList.add("DateOfBirth"); // 9
+		featureNameList.add("ResponsibleResearcher"); // 10
+		featureNameList.add("Location"); // 11
+		featureNameList.add("IsWritableByUser"); // 12
 		// Make all values
 		int animalCnt = 0;
 		for (Individual animal : animalsToAddList) {
+
 			String animalName = animal.getName();
 			// Set Active, with (start)time = entrydate and endtime = null
 			ProtocolApplication app = appsToAddList.get(0);
@@ -459,6 +462,12 @@ public class AddAnimalPlugin extends EasyPluginController {
 						app.getName(), entryDate, null,
 						featureNameList.get(11), animalName, null, locName));
 			}
+			// Set isWritable by admin
+			app = appsToAddList.get(11);
+			valuesToAddList.add(ct.createObservedValue(invName, app.getName(),
+					entryDate, null, featureNameList.get(12), animalName, null,
+					"admin"));
+
 			animalCnt++;
 		}
 		db.add(valuesToAddList);
