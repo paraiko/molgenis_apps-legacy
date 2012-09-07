@@ -29,18 +29,19 @@ plink,${tooldir}/plink-1.07-x86_64/plink-1.07-x86_64/plink,,,
 #homedir,${root}/home/fvandijk,,,
 homedir,${root}/groups/gonl/projects/imputationBenchmarking/eQtl/,,,
 projectdir,${homedir}/${project},,,
-projectTempDir,${tempdir}/${McId}/,end with slash,,
+projectTempDir,${tempdir}/${McId}/${project}/,end with slash,,
 studyPedMapDir,${projectTempDir}/PedMap/,end with slash,,
 studyTriTyperTempDir,${projectTempDir}/~StudyTriTyper/,end with slash,,
 studyTriTyperDir,${projectTempDir}/StudyTriTyper/,end with slash,,
 preparedStudyTempDir,${projectTempDir}/~preparedStudy/,end with slash,,
 preparedStudyDir,${projectTempDir}/preparedStudy/,end with slash,,
-studyPedMap,studyPedMapDir/${chr},,,
+studyPedMap,${studyPedMapDir}/,,,
 gtoolBin,${tooldir}/gtool_v0.7.5_x86_64>/gtool,,,
 referenceFolder,${resdir}/imputation/,Maybe change this path later,,
 referenceTriTyperDir,${referenceFolder}/${referencePanel}/TriTyper/,end with slash,,
 referenceImpute2Dir,${referenceFolder}/${referencePanel}/Impute2/,end with slash,,
 impute2Bin,${tooldir}/impute_v2.2.2_x86_64_static/impute2,,,
+imputationToolJar,${tooldir}/ImputationTool/dist/ImputationTool2.jar,,,
 referenceImpute2HapFile,${referenceImpute2Dir}/${chr}.hap
 referenceImpute2LegendFile,${referenceImpute2Dir}/${chr}.legend
 referenceImpute2MapFile,${referenceImpute2Dir}/${chr}.map
@@ -50,3 +51,4 @@ impute2ResultChrBinTemp,${impute2ResultDir}/${chr}/~chr_${chr}_from_${fromChrPos
 impute2ResultChrBin,${impute2ResultDir}/${chr}/chr_${chr}_from_${fromChrPos}_to_${toChrPos},,,
 impute2ResultChrBinGenFile,${impute2ResultChrBin}.gen,Ask alex for correct file extension,,
 impute2ResultChrBinInfoFile,${impute2ResultChrBin}.info,,,
+project,,,,"imputationResult,studyInputPedMap,referencePanel"
