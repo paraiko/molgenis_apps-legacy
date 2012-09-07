@@ -46,6 +46,7 @@ log*
 /generated
 /target
 logger.out*
+logger.out
 /bin
 /dist
 /.settings/*
