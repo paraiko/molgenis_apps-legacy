@@ -131,26 +131,30 @@ public class ListPluginMatrix extends EasyPluginController {
 				measurementsToShow.add("OldRhutDbAnimalId");
 				measurementsToShow.add("Location");
 				measurementsToShow.add("Background");
-				measurementsToShow.add("isReadable");
+				// FIXME temperarily add security measurements to view during
+				// development
+				measurementsToShow.add("IsReadableByUser");
+				measurementsToShow.add("IsWritableByUser");
+				measurementsToShow.add("IsReadableByGroup");
+				measurementsToShow.add("IsWritableByGroup");
 				// measurementsToShow.add("Remark");
 				List<MatrixQueryRule> filterRules = new ArrayList<MatrixQueryRule>();
 				filterRules.add(new MatrixQueryRule(
 						MatrixQueryRule.Type.rowHeader,
 						Individual.INVESTIGATION_NAME, Operator.IN,
 						investigationNames));
-				// Security
-				List<MatrixQueryRule> mq = new ArrayList<MatrixQueryRule>();
-				MatrixQueryRule mqr = new MatrixQueryRule(
-						MatrixQueryRule.Type.colValueProperty,
-						cs.getMeasurementId("isReadable"), ObservedValue.VALUE,
-						Operator.EQUALS, "caretakers");
-				filterRules.add(mqr);
-				mqr = new MatrixQueryRule(
-						MatrixQueryRule.Type.colValueProperty,
-						cs.getMeasurementId("isReadable"), ObservedValue.VALUE,
-						Operator.EQUALS, "researchers");
-
-				filterRules.add(mqr);
+				/*
+				 * Security List<MatrixQueryRule> mq = new
+				 * ArrayList<MatrixQueryRule>(); MatrixQueryRule mqr = new
+				 * MatrixQueryRule( MatrixQueryRule.Type.colValueProperty,
+				 * cs.getMeasurementId("isReadable"), ObservedValue.VALUE,
+				 * Operator.EQUALS, "caretakers"); filterRules.add(mqr); mqr =
+				 * new MatrixQueryRule( MatrixQueryRule.Type.colValueProperty,
+				 * cs.getMeasurementId("isReadable"), ObservedValue.VALUE,
+				 * Operator.EQUALS, "researchers");
+				 * 
+				 * filterRules.add(mqr);
+				 */
 
 				filterRules.add(new MatrixQueryRule(
 						MatrixQueryRule.Type.colValueProperty, cs
