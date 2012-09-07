@@ -44,8 +44,12 @@ public class PrefillAnimalDB {
 	private CommonService ct;
 	private Logger logger;
 	private String userName = "admin";
-	private String invName = "System";
+	private String invName = "System"; // FIXME ! this HAS to be System since
+										// this name is hardcoded in the pheono
+										// measurementdecorator...
 
+	// private List<Investigation> investigationsToAddList = new
+	// ArrayList<Investigation>();
 	private List<ProtocolApplication> protocolAppsToAddList = new ArrayList<ProtocolApplication>();
 	private List<ObservedValue> valuesToAddList = new ArrayList<ObservedValue>();
 	private List<Panel> panelsToAddList = new ArrayList<Panel>();
@@ -88,7 +92,8 @@ public class PrefillAnimalDB {
 					new BufferedOutputStream(new FileOutputStream(path
 							+ entry.getName())));
 		}
-		// Run convertor steps
+		// Run converter steps
+		// populateInvestigation(path + "investigation.csv");
 		populateProtocolApplication();
 		populatePrefixes(path + "nameprefix.csv");
 		populateNews(path + "news.csv");
@@ -119,6 +124,8 @@ public class PrefillAnimalDB {
 		logger.debug("Ontology terms successfully added");
 		db.add(categoriesToAddList);
 		logger.debug("Categories successfully added");
+		// db.add(investigationsToAddList);
+		// logger.debug("Investigations succesfully added");
 		List<Measurement> measList = new ArrayList<Measurement>();
 		for (Measurement meas : measMap.values()) {
 			measList.add(meas);
@@ -232,6 +239,18 @@ public class PrefillAnimalDB {
 			measMap.put(measName, meas);
 		}
 	}
+
+	/*
+	 * public void populateInvestigation(String filename) throws Exception {
+	 * File file = new File(filename); CsvFileReader reader = new
+	 * CsvFileReader(file); for (Tuple tuple : reader) { Investigation inv = new
+	 * Investigation(); inv.setName(tuple.getString("name"));
+	 * inv.setDescription(tuple.getString("description"));
+	 * inv.setCanRead_Name(tuple.getString("canRead_name"));
+	 * inv.setCanWrite_Name(tuple.getString("canWrite_name"));
+	 * inv.setOwns_Name(tuple.getString("owns_name"));
+	 * investigationsToAddList.add(inv); } System.out.println(); }
+	 */
 
 	public void populateProtocol(String filename) throws Exception {
 		File file = new File(filename);
