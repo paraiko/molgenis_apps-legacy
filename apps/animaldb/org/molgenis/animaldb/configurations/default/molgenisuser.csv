@@ -1,5 +1,5 @@
 name,FirstName,LastName,password_,active,superuser
-r1,a,a,md5_7c92cf1eee8d99cc85f8355a3d6e4b86,true,false
-c1,r1,r1,md5_a9f7e97965d6cf799a529102a973b8b9,true,false
-sysa1,c1,c1,md5_4cb9c8a8048fd02294477fcb1a41191a,true,false
+r1,r1,r1,md5_7c92cf1eee8d99cc85f8355a3d6e4b86,true,false
+c1,c1,c1,md5_a9f7e97965d6cf799a529102a973b8b9,true,false
+sysa1,sysa1,sysa1,md5_4cb9c8a8048fd02294477fcb1a41191a,true,false
 

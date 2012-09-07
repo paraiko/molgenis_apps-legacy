@@ -148,7 +148,7 @@ public class AnimalDBHeader extends PluginModel<Entity> {
 	public String getFullUserName() {
 
 		if (this.getLogin().isAuthenticated()) {
-			((DatabaseLogin) this.getLogin()).getFullUserName();
+			return ((DatabaseLogin) this.getLogin()).getFullUserName();
 		}
 		return null;
 	}
