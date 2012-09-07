@@ -1,5 +1,7 @@
 package org.molgenis.matrix.component.general;
 
+import java.util.List;
+
 import org.molgenis.framework.db.QueryRule;
 
 /**
@@ -7,122 +9,162 @@ import org.molgenis.framework.db.QueryRule;
  */
 public class MatrixQueryRule extends QueryRule {
 
-    public enum Type {
+	public enum Type {
 
-        /** a filter on row or col index. Synonymous to rowHeader(property=id) */
-        rowIndex, colIndex,
-        /** a filter on a field of the row/colheader */
-        rowHeader, colHeader,
-        /** a filter on row or column values. Synonymous to rowValueProperty(property=value) */
-        rowValues, colValues,
-        /** a filter on a property of a row or column value. E.g. protocolApplication */
-        rowValueProperty, colValueProperty,
-        /** a filter on values, globally */
-        value, valueProperty
-    }
-    //the aspect of the matrix to be filtered.
-    private Type filterType;
-    //for xValue filters, the index of the dimension. E.g. colId
-    private Integer dimIndex;
-    
-    private int protocolId;
-    private int measurementId;
+		/** a filter on row or col index. Synonymous to rowHeader(property=id) */
+		rowIndex, colIndex,
+		/** a filter on a field of the row/colheader */
+		rowHeader, colHeader,
+		/**
+		 * a filter on row or column values. Synonymous to
+		 * rowValueProperty(property=value)
+		 */
+		rowValues, colValues,
+		/**
+		 * a filter on a property of a row or column value. E.g.
+		 * protocolApplication
+		 */
+		rowValueProperty, colValueProperty,
+		/** a filter on values, globally */
+		value, valueProperty
+	}
 
-    /**
-     * Special constructor for QueryRules in the context of Matrix. Allows more
-     * combinations needed for twodimensional data filtering.
-     */
-    public MatrixQueryRule(Type type, String field, Operator operator, Object value) {
-        this.filterType = type;
+	// the aspect of the matrix to be filtered.
+	private Type filterType;
+	// for xValue filters, the index of the dimension. E.g. colId
+	private Integer dimIndex;
 
-        this.setField(field);
-        this.setOperator(operator);
-        this.setValue(value);
+	private int protocolId;
+	private int measurementId;
 
-        if (operator == Operator.LAST
-                || operator == Operator.AND || operator == Operator.OR) {
-            throw new IllegalArgumentException(this + ": Operator." + operator
-                    + " cannot be used with two arguments");
-        }
+	/** Place to store nested rules */
+	// FIXME: why not put this in value?
+	private MatrixQueryRule[] nestedRules;
 
-        if ((operator == Operator.SORTASC || operator == Operator.SORTDESC) && value == null) {
-            this.setValue(field);
-        }
-    }
+	// public MatrixQueryRule() {
+	// }
 
-    /**
-     * Field can be left out. In that case the rule will use the default field (depends on implementation).
-     * For example: in case of 'index' there is no field. In case of 'ObservedValue' the default may be 'value'.
-     * 
-     * @param type
-     * @param operator
-     * @param value
-     */
-    public MatrixQueryRule(Type type, Operator operator, Object value) {
-        this.setFilterType(type);
-        this.setOperator(operator);
-        this.setValue(value);
-    }
-    
-    
-    public MatrixQueryRule(Type type, int protocolId, int measurementId, Operator operator, Object value) {
-        this.filterType = type;
-        this.protocolId = protocolId;
-        this.measurementId = measurementId;
-        this.operator = operator;
-        this.value = value;
-    }
+	/**
+	 * Special constructor for QueryRules in the context of Matrix. Allows more
+	 * combinations needed for twodimensional data filtering.
+	 */
+	public MatrixQueryRule(Type type, String field, Operator operator,
+			Object value) {
+		this.filterType = type;
 
-    public void setFilterType(Type filterType) {
-        this.filterType = filterType;
-    }
+		this.setField(field);
+		this.setOperator(operator);
+		this.setValue(value);
 
-    public MatrixQueryRule(Type type, Integer colIndex,
-            String colProperty, Operator operator, Object object) {
-        this(type, colProperty, operator, object);
-        this.dimIndex = colIndex;
-    }
+		if (operator == Operator.LAST || operator == Operator.AND
+				|| operator == Operator.OR) {
+			throw new IllegalArgumentException(this + ": Operator." + operator
+					+ " cannot be used with two arguments");
+		}
 
-    public MatrixQueryRule(Type type, int protoclId, Integer colIndex,
-            String colProperty, Operator operator, Object object) {
-        this(type, colProperty, operator, object);
-        this.dimIndex = colIndex;
-        this.protocolId = protoclId;
-    }
+		if ((operator == Operator.SORTASC || operator == Operator.SORTDESC)
+				&& value == null) {
+			this.setValue(field);
+		}
+	}
 
-    public Type getFilterType() {
-        return filterType;
-    }
+	public MatrixQueryRule(List<MatrixQueryRule> rules) {
+		this(rules.toArray(new MatrixQueryRule[rules.size()]));
+	}
 
-    public Integer getDimIndex() {
-        return dimIndex;
-    }
+	public MatrixQueryRule[] getNestedRules() {
+		return nestedRules;
+	}
 
-    public void setDimIndex(Integer dimIndex) {
-        this.dimIndex = dimIndex;
-    }
+	/**
+	 * Constructor to create a nested rule set.
+	 * 
+	 * @param rules
+	 *            to be nested.
+	 */
+	public MatrixQueryRule(MatrixQueryRule... rules) {
+		operator = Operator.NESTED;
+		nestedRules = rules;
+	}
 
-    public int getProtocolId() {
-        return protocolId;
-    }
+	/**
+	 * Field can be left out. In that case the rule will use the default field
+	 * (depends on implementation). For example: in case of 'index' there is no
+	 * field. In case of 'ObservedValue' the default may be 'value'.
+	 * 
+	 * @param type
+	 * @param operator
+	 * @param value
+	 */
+	public MatrixQueryRule(Type type, Operator operator, Object value) {
+		this.setFilterType(type);
+		this.setOperator(operator);
+		this.setValue(value);
+	}
 
-    public void setProtocolId(int protocolId) {
-        this.protocolId = protocolId;
-    }
+	public MatrixQueryRule(Type type, int protocolId, int measurementId,
+			Operator operator, Object value) {
+		this.filterType = type;
+		this.protocolId = protocolId;
+		this.measurementId = measurementId;
+		this.operator = operator;
+		this.value = value;
+	}
 
-    public int getMeasurementId() {
-        return measurementId;
-    }
+	public void setFilterType(Type filterType) {
+		this.filterType = filterType;
+	}
 
-    public void setMeasurementId(int measurementId) {
-        this.measurementId = measurementId;
-    }
+	public MatrixQueryRule(Type type, Integer colIndex, String colProperty,
+			Operator operator, Object object) {
+		this(type, colProperty, operator, object);
+		this.dimIndex = colIndex;
+	}
 
-    
-    
-    public String toString() {
-        return "Filter type: " + this.getFilterType()
-                + (this.getDimIndex() != null ? ", dimension index: " + this.getDimIndex() : "")
-                + ", queryrule: " + super.toString();
-    }
+	public MatrixQueryRule(Type type, int protoclId, Integer colIndex,
+			String colProperty, Operator operator, Object object) {
+		this(type, colProperty, operator, object);
+		this.dimIndex = colIndex;
+		this.protocolId = protoclId;
+	}
+
+	public MatrixQueryRule(MatrixQueryRule mqr1) {
+		// TODO Auto-generated constructor stub
+	}
+
+	public Type getFilterType() {
+		return filterType;
+	}
+
+	public Integer getDimIndex() {
+		return dimIndex;
+	}
+
+	public void setDimIndex(Integer dimIndex) {
+		this.dimIndex = dimIndex;
+	}
+
+	public int getProtocolId() {
+		return protocolId;
+	}
+
+	public void setProtocolId(int protocolId) {
+		this.protocolId = protocolId;
+	}
+
+	public int getMeasurementId() {
+		return measurementId;
+	}
+
+	public void setMeasurementId(int measurementId) {
+		this.measurementId = measurementId;
+	}
+
+	public String toString() {
+		return "Filter type: "
+				+ this.getFilterType()
+				+ (this.getDimIndex() != null ? ", dimension index: "
+						+ this.getDimIndex() : "") + ", queryrule: "
+				+ super.toString();
+	}
 }

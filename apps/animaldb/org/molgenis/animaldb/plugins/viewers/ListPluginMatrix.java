@@ -138,23 +138,36 @@ public class ListPluginMatrix extends EasyPluginController {
 				measurementsToShow.add("IsReadableByGroup");
 				measurementsToShow.add("IsWritableByGroup");
 				// measurementsToShow.add("Remark");
+
 				List<MatrixQueryRule> filterRules = new ArrayList<MatrixQueryRule>();
 				filterRules.add(new MatrixQueryRule(
 						MatrixQueryRule.Type.rowHeader,
 						Individual.INVESTIGATION_NAME, Operator.IN,
 						investigationNames));
-				/*
-				 * Security List<MatrixQueryRule> mq = new
-				 * ArrayList<MatrixQueryRule>(); MatrixQueryRule mqr = new
-				 * MatrixQueryRule( MatrixQueryRule.Type.colValueProperty,
-				 * cs.getMeasurementId("isReadable"), ObservedValue.VALUE,
-				 * Operator.EQUALS, "caretakers"); filterRules.add(mqr); mqr =
-				 * new MatrixQueryRule( MatrixQueryRule.Type.colValueProperty,
-				 * cs.getMeasurementId("isReadable"), ObservedValue.VALUE,
-				 * Operator.EQUALS, "researchers");
-				 * 
-				 * filterRules.add(mqr);
-				 */
+
+				// Query<Protocol> q = db.query(Protocol.class);
+				// QueryRule qr1 = new QueryRule(Measurement.INVESTIGATION,
+				// Operator.IN, investigationIds);
+				// QueryRule qr2 = new QueryRule(Operator.OR);
+				// QueryRule qr3 = new QueryRule(Measurement.INVESTIGATION_NAME,
+				// Operator.EQUALS, "System");
+				// q.addRules(new QueryRule(qr1, qr2, qr3)); // only user's own
+				// OR System investigation
+				// return q.find();
+
+				List<MatrixQueryRule> mq = new ArrayList<MatrixQueryRule>();
+				MatrixQueryRule mqr1 = new MatrixQueryRule(
+						MatrixQueryRule.Type.colValueProperty,
+						cs.getMeasurementId("IsWritableByGroup"),
+						ObservedValue.VALUE, Operator.EQUALS, "caretakers");
+
+				MatrixQueryRule mqr3 = new MatrixQueryRule(
+						MatrixQueryRule.Type.colValueProperty,
+						cs.getMeasurementId("IsWritableByUser"),
+						ObservedValue.VALUE, Operator.EQUALS, "admin");
+				// filterRules.add(new MatrixQueryRule(mqr1, mqr3));
+				// filterRules.add(new MatrixQueryRule(mqr1, mqr3));
+				// filterRules.add(mqr2);
 
 				filterRules.add(new MatrixQueryRule(
 						MatrixQueryRule.Type.colValueProperty, cs
