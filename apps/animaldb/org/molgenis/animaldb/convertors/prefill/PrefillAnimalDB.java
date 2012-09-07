@@ -73,9 +73,10 @@ public class PrefillAnimalDB {
 			Investigation newInv = new Investigation();
 			newInv.setName(invName);
 			newInv.setOwns_Name("admin");
-			newInv.setCanRead_Name("AllUsers");
+			newInv.setCanRead_Name("AllUsers"); // adbSystem
 			db.add(newInv);
 		}
+
 	}
 
 	public void prefillFromZip(String filename) throws Exception {
@@ -112,6 +113,7 @@ public class PrefillAnimalDB {
 		populateMolgenisGroups(path + "molgenisgroup.csv");
 		populateMolgenisRoleGroupLinks(path + "molgenisrolegrouplink.csv");
 		populateMolgenisPermissions(path + "molgenispermission.csv");
+
 		// Add it all to the database
 		writeToDb();
 	}
