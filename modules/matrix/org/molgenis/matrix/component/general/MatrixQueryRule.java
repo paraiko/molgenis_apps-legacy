@@ -1,7 +1,5 @@
 package org.molgenis.matrix.component.general;
 
-import java.util.List;
-
 import org.molgenis.framework.db.QueryRule;
 
 /**
@@ -37,13 +35,6 @@ public class MatrixQueryRule extends QueryRule {
 	private int protocolId;
 	private int measurementId;
 
-	/** Place to store nested rules */
-	// FIXME: why not put this in value?
-	private MatrixQueryRule[] nestedRules;
-
-	// public MatrixQueryRule() {
-	// }
-
 	/**
 	 * Special constructor for QueryRules in the context of Matrix. Allows more
 	 * combinations needed for twodimensional data filtering.
@@ -66,25 +57,6 @@ public class MatrixQueryRule extends QueryRule {
 				&& value == null) {
 			this.setValue(field);
 		}
-	}
-
-	public MatrixQueryRule(List<MatrixQueryRule> rules) {
-		this(rules.toArray(new MatrixQueryRule[rules.size()]));
-	}
-
-	public MatrixQueryRule[] getNestedRules() {
-		return nestedRules;
-	}
-
-	/**
-	 * Constructor to create a nested rule set.
-	 * 
-	 * @param rules
-	 *            to be nested.
-	 */
-	public MatrixQueryRule(MatrixQueryRule... rules) {
-		operator = Operator.NESTED;
-		nestedRules = rules;
 	}
 
 	/**
@@ -126,10 +98,6 @@ public class MatrixQueryRule extends QueryRule {
 		this(type, colProperty, operator, object);
 		this.dimIndex = colIndex;
 		this.protocolId = protoclId;
-	}
-
-	public MatrixQueryRule(MatrixQueryRule mqr1) {
-		// TODO Auto-generated constructor stub
 	}
 
 	public Type getFilterType() {
