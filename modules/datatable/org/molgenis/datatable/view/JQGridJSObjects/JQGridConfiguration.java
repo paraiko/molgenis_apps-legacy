@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import org.molgenis.datatable.model.EditableTupleTable;
 import org.molgenis.datatable.model.FilterableTupleTable;
 import org.molgenis.datatable.model.ProtocolTable;
 import org.molgenis.datatable.model.TableException;
@@ -74,6 +75,8 @@ public class JQGridConfiguration
 
 	public JQGridSettings settings = new JQGridSettings();
 
+	public JQGridSearchOptions searchOptions = new JQGridSearchOptions();
+
 	// The javascript tree to show/hide columns above the grid
 	public boolean showColumnTree = true;
 
@@ -104,6 +107,10 @@ public class JQGridConfiguration
 		{
 			// sortable = true;
 			settings.search = true;
+		}
+
+		if (tupleTable instanceof EditableTupleTable)
+		{
 			settings.add = true;
 			settings.edit = true;
 			settings.del = true;
