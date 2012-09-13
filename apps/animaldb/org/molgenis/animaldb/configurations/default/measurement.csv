@@ -79,3 +79,7 @@ TransponderId;String;;;false;string;To set the ID of an animal's transponder.
 Color;String;;;false;string;To set an animal's color.
 Earmark;String;;;false;string;To set an animal's earmark.
 ResponsibleResearcher;String;;;false;string;To set the researcher responsible for this animal.
+IsReadableByUser;String;;;false;string;To set a user that can read this object.
+IsWritableByUser;String;;;false;string;to set a user that can edit this object.
+IsReadableByGroup;String;;;false;string;To set a usergroup that can read this object.
+IsWritableByGroup;String;;;false;string;to set a usergroup that can edit this object.

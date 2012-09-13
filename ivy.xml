@@ -62,7 +62,7 @@
 		<dependency org="com.itextpdf" name="itextpdf" rev="5.0.6"/>
 		
 		<dependency org="org.expressme" name="JOpenId" rev="1.08" />
-		
+				
 		<dependency org="org.apache.lucene" name="lucene-core" rev="3.0.2" />
 		<dependency org="org.apache.lucene" name="lucene-highlighter" rev="3.0.2" />
 		

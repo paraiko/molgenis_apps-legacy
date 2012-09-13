@@ -21,7 +21,6 @@ import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.ui.EasyPluginController;
 import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.framework.ui.ScreenView;
-import org.molgenis.framework.ui.ScreenModel.Show;
 import org.molgenis.framework.ui.html.ActionInput;
 import org.molgenis.framework.ui.html.DateInput;
 import org.molgenis.framework.ui.html.DivPanel;
@@ -40,10 +39,8 @@ import org.molgenis.pheno.ObservedValue;
 import org.molgenis.protocol.ProtocolApplication;
 import org.molgenis.util.HandleRequestDelegationException;
 import org.molgenis.util.Tuple;
-import org.molgenis.util.SimpleTuple;
 
-public class AddAnimalPlugin extends EasyPluginController
-{
+public class AddAnimalPlugin extends EasyPluginController {
 	private static final long serialVersionUID = -4185405160313262242L;
 	private CommonService ct = CommonService.getInstance();
 	// Screen components:
@@ -68,8 +65,10 @@ public class AddAnimalPlugin extends EasyPluginController
 	public SelectInput actor = null;
 	public SelectInput location = null;
 	public DivPanel containingPanel = null;
-	private SimpleDateFormat inputFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.US);
-	private SimpleDateFormat dbFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+	private SimpleDateFormat inputFormat = new SimpleDateFormat("dd-MM-yyyy",
+			Locale.US);
+	private SimpleDateFormat dbFormat = new SimpleDateFormat("yyyy-MM-dd",
+			Locale.US);
 	// Variables for holding form values between wizard steps:
 	private String speciesName = null;
 	private String backgroundName = null;
@@ -82,16 +81,14 @@ public class AddAnimalPlugin extends EasyPluginController
 	private String resResearcher = null;
 	private List<String> genes = null;
 	private List<String> genestates = null;
-	
+
 	public DateInput fakedate = null;
 
-	public AddAnimalPlugin(String name, ScreenController<?> parent)
-	{
+	public AddAnimalPlugin(String name, ScreenController<?> parent) {
 		super(name, parent);
 	}
 
-	public String getCustomHtmlHeaders()
-	{
+	public String getCustomHtmlHeaders() {
 		return "<link rel=\"stylesheet\" style=\"text/css\" href=\"res/css/animaldb.css\">\n"
 				+ "<script src=\"res/scripts/custom/addanimals.js\" type=\"text/javascript\" language=\"javascript\"></script>\n"
 				+ "<script src=\"res/jquery-plugins/multiselect/js/ui.multiselect.js\" type=\"text/javascript\" language=\"javascript\"></script>\n"
@@ -102,32 +99,25 @@ public class AddAnimalPlugin extends EasyPluginController
 	}
 
 	@Override
-	public void reload(Database db)
-	{
-		try
-		{
+	public void reload(Database db) {
+		try {
 			ct.setDatabase(db);
 			ct.makeObservationTargetNameMap(db.getLogin().getUserName(), false);
-			if (speciesName == null)
-			{
+			if (speciesName == null) {
 				resetAllFormValues();
 				populateFirstTablePanel(db);
 			}
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			e.printStackTrace();
 			String message = "Something went wrong while reloading";
-			if (e.getMessage() != null)
-			{
+			if (e.getMessage() != null) {
 				message += (": " + e.getMessage());
 			}
 			this.setError(message);
 		}
 	}
 
-	private void resetAllFormValues()
-	{
+	private void resetAllFormValues() {
 		backgroundName = null;
 		lineName = null;
 		sourceName = null;
@@ -140,241 +130,191 @@ public class AddAnimalPlugin extends EasyPluginController
 		genestates = null;
 	}
 
-	private void resetAllFields()
-	{
+	private void resetAllFields() {
 		speciesName = null; // also trigger for reload() to render first screen
 							// again
 		resetAllFormValues();
 	}
 
 	@Override
-	public Show handleRequest(Database db, Tuple request, OutputStream out) throws HandleRequestDelegationException
-	{
+	public Show handleRequest(Database db, Tuple request, OutputStream out)
+			throws HandleRequestDelegationException {
 		ct.setDatabase(db);
-		try
-		{
+		try {
 			String action = request.getAction();
 			containingPanel.setValuesFromRequest(request);
 
-			if (action.equals("Cancel"))
-			{
+			if (action.equals("Cancel")) {
 				resetAllFields();
 			}
-			if (action.equals("Prev1"))
-			{
+			if (action.equals("Prev1")) {
 				populateFirstTablePanel(db);
 			}
-			if (action.equals("Cont1"))
-			{
+			if (action.equals("Cont1")) {
 				handleFirstScreenRequest(db, request);
 				populateSecondTablePanel(db);
 			}
-			if (action.equals("Prev2"))
-			{
+			if (action.equals("Prev2")) {
 				populateSecondTablePanel(db);
 			}
-			if (action.equals("Cont2"))
-			{
+			if (action.equals("Cont2")) {
 				handleSecondScreenRequest(db, request);
-				if (animalType.equals("B. Transgeen dier") && genes != null)
-				{
+				if (animalType.equals("B. Transgeen dier") && genes != null) {
 					populateThirdTablePanel(db);
-				}
-				else
-				{
+				} else {
 					// Skip third screen if animals are non-GMO or if no genes
 					// selected
 					populateFourthTablePanel(db);
 				}
 			}
-			if (action.equals("Prev3"))
-			{
-				if (animalType.equals("B. Transgeen dier") && genes != null)
-				{
+			if (action.equals("Prev3")) {
+				if (animalType.equals("B. Transgeen dier") && genes != null) {
 					populateThirdTablePanel(db);
-				}
-				else
-				{
+				} else {
 					// Skip third screen if animals are non-GMO or if no genes
 					// selected
 					populateSecondTablePanel(db);
 				}
 			}
-			if (action.equals("Cont3"))
-			{
+			if (action.equals("Cont3")) {
 				handleThirdScreenRequest(db, request);
 				populateFourthTablePanel(db);
 			}
-			if (action.equals("Save"))
-			{
+			if (action.equals("Save")) {
 				handleAddRequest(db, request);
 				resetAllFields();
 			}
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			e.printStackTrace();
-			if (e.getMessage() != null)
-			{
+			if (e.getMessage() != null) {
 				this.setError("Error: " + e.getMessage());
 			}
 		}
-		
+
 		return Show.SHOW_MAIN;
 	}
 
-	private void handleFirstScreenRequest(Database db, Tuple request) throws Exception
-	{
-		if (species.getObject() != null)
-		{
+	private void handleFirstScreenRequest(Database db, Tuple request)
+			throws Exception {
+		if (species.getObject() != null) {
 			speciesName = species.getObject().toString();
-		}
-		else
-		{
+		} else {
 			this.setError("No species given - animal(s) not added");
 		}
-		if (animaltype.getObject() != null)
-		{
+		if (animaltype.getObject() != null) {
 			animalType = animaltype.getObject().toString();
-		}
-		else
-		{
+		} else {
 			throw (new Exception("No animal type given - animal(s) not added"));
 		}
-		if (source.getObject() != null)
-		{
+		if (source.getObject() != null) {
 			sourceName = source.getObject().toString();
-		}
-		else
-		{
+		} else {
 			throw (new Exception("No source given - animal(s) not added"));
 		}
-		SimpleDateFormat dateOnlyFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.US);
+		SimpleDateFormat dateOnlyFormat = new SimpleDateFormat("dd-MM-yyyy",
+				Locale.US);
 		// Birth date (String)
-		if (!birthdate.getValue().equals(""))
-		{
-			//FIXME --> construct to make sure that the date is saved in de Animaldb date format(yyyy-MM-dd)
-			//birthDate = birthdate.getValue();
+		if (!birthdate.getValue().equals("")) {
+			// FIXME --> construct to make sure that the date is saved in de
+			// Animaldb date format(yyyy-MM-dd)
+			// birthDate = birthdate.getValue();
 			Date bd = dbFormat.parse(birthdate.getValue());
 			birthDate = dbFormat.format(bd);
-			
+
 		}
 		// Entry date (Date)
-		if (!entrydate.getValue().equals(""))
-		{
+		if (!entrydate.getValue().equals("")) {
 			String entryDateString = entrydate.getValue();
 			entryDate = dbFormat.parse(entryDateString);
-		}
-		else
-		{
+		} else {
 			throw (new Exception("No entry date given - animal(s) not added"));
 		}
 		// Researcher
-		if (researcher.getObject() != null)
-		{
+		if (researcher.getObject() != null) {
 			resResearcher = researcher.getValue();
 		}
 		// Location
-		if (location.getObject() != null)
-		{
+		if (location.getObject() != null) {
 			locName = location.getObject().toString();
 		}
 	}
 
-	private void handleSecondScreenRequest(Database db, Tuple request) throws Exception
-	{
+	private void handleSecondScreenRequest(Database db, Tuple request)
+			throws Exception {
 
-		if (background.getObject() != null)
-		{
+		if (background.getObject() != null) {
 			backgroundName = background.getObject().toString();
-		}
-		else
-		{
+		} else {
 			throw (new Exception("No background given - animal(s) not added"));
 		}
-		if (line.getObject() != null)
-		{
+		if (line.getObject() != null) {
 			lineName = line.getObject().toString();
 		}
-		if (animalType.equals("B. Transgeen dier"))
-		{
+		if (animalType.equals("B. Transgeen dier")) {
 			genes = gene.getObject();
 		}
 	}
 
-	private void handleThirdScreenRequest(Database db, Tuple request) throws Exception
-	{
+	private void handleThirdScreenRequest(Database db, Tuple request)
+			throws Exception {
 
 		genestates = new ArrayList<String>();
-		for (SelectInput genestateBox : genestateList)
-		{
+		for (SelectInput genestateBox : genestateList) {
 			genestates.add((String) genestateBox.getObject());
 		}
 	}
 
-	private void handleAddRequest(Database db, Tuple request) throws Exception
-	{
+	private void handleAddRequest(Database db, Tuple request) throws Exception {
 
 		ct.setDatabase(db);
 
 		// Get name from last form
 		String nameBase = "";
 		int startNumber = -1;
-		if (namebase.getObject() != null)
-		{
+		if (namebase.getObject() != null) {
 			nameBase = namebase.getObject().toString();
-			if (nameBase.equals("New"))
-			{
-				if (newnamebase.getObject() != null)
-				{
+			if (nameBase.equals("New")) {
+				if (newnamebase.getObject() != null) {
 					nameBase = newnamebase.getObject().toString();
-				}
-				else
-				{
+				} else {
 					nameBase = "";
 				}
 			}
-		}
-		else
-		{
+		} else {
 			nameBase = "";
 		}
-		if (startnumber.getObject() != null)
-		{
+		if (startnumber.getObject() != null) {
 			// TODO: Find out why HtmlInput<E>'s getObject() returns a String
 			// object and not an
 			// Integer one, as expected!
 			startNumber = Integer.parseInt(startnumber.getValue());
-		}
-		else
-		{
+		} else {
 			startNumber = 1; // standard start at 1
 		}
 		// Get numbers of animals from last form
 		int nrOfMales = 0;
 		int nrOfFemales = 0;
 		int nrOfUnknowns = 0;
-		if (numberofmales.getObject() != null)
-		{
+		if (numberofmales.getObject() != null) {
 			nrOfMales = Integer.parseInt(numberofmales.getValue());
 		}
-		if (numberoffemales.getObject() != null)
-		{
+		if (numberoffemales.getObject() != null) {
 			nrOfFemales = Integer.parseInt(numberoffemales.getValue());
 		}
-		if (numberofunknowns.getObject() != null)
-		{
+		if (numberofunknowns.getObject() != null) {
 			nrOfUnknowns = Integer.parseInt(numberofunknowns.getValue());
 		}
 		int nrOfAnimals = nrOfMales + nrOfFemales + nrOfUnknowns;
-		if (nrOfAnimals == 0)
-		{
+		if (nrOfAnimals == 0) {
 			throw (new Exception("No number(s) given - animal(s) not added"));
 		}
 
 		// Investigation
 		String userName = db.getLogin().getUserName();
-		String invName = ct.getOwnUserInvestigationNames(userName).get(0);
+		// String invName = ct.getOwnUserInvestigationNames(userName).get(0);
+		String invName = "System"; // write all animals on the system
+									// investigation so everybody can reach
+									// them.
 
 		// Init lists that we can later add to the DB at once
 		List<ObservedValue> valuesToAddList = new ArrayList<ObservedValue>();
@@ -382,12 +322,12 @@ public class AddAnimalPlugin extends EasyPluginController
 		List<ProtocolApplication> appsToAddList = new ArrayList<ProtocolApplication>();
 
 		// Make all animals
-		for (int i = 0; i < nrOfAnimals; i++)
-		{
+		for (int i = 0; i < nrOfAnimals; i++) {
 			// Make and add animal
 			String nrPart = "" + (startNumber + i);
 			nrPart = ct.prependZeros(nrPart, 6);
-			Individual newAnimal = ct.createIndividual(invName, nameBase + nrPart, userName);
+			Individual newAnimal = ct.createIndividual(invName, nameBase
+					+ nrPart, userName);
 			animalsToAddList.add(newAnimal);
 		}
 		db.add(animalsToAddList);
@@ -397,126 +337,146 @@ public class AddAnimalPlugin extends EasyPluginController
 
 		// Make all protocol applications
 		List<String> protocolNameList = new ArrayList<String>();
-		protocolNameList.add("SetActive");
-		protocolNameList.add("SetSpecies");
-		protocolNameList.add("SetSex");
-		protocolNameList.add("SetAnimalType");
-		protocolNameList.add("SetSource");
-		protocolNameList.add("SetBackground");
-		protocolNameList.add("SetLine");
-		protocolNameList.add("SetGenotype");
-		protocolNameList.add("SetDateOfBirth");
-		protocolNameList.add("SetResponsibleResearcher");
-		protocolNameList.add("SetLocation");
-		for (int j = 0; j < 11; j++)
-		{
-			ProtocolApplication newApp = ct.createProtocolApplication(invName, protocolNameList.get(j));
+		protocolNameList.add("SetActive"); // 0
+		protocolNameList.add("SetSpecies");// 1
+		protocolNameList.add("SetSex"); // 2
+		protocolNameList.add("SetAnimalType"); // 3
+		protocolNameList.add("SetSource"); // 4
+		protocolNameList.add("SetBackground"); // 5
+		protocolNameList.add("SetLine"); // 6
+		protocolNameList.add("SetGenotype"); // 7
+		protocolNameList.add("SetDateOfBirth"); // 8
+		protocolNameList.add("SetResponsibleResearcher"); // 9
+		protocolNameList.add("SetLocation"); // 10
+		protocolNameList.add("SetIsWritableByUser"); // 11
+		protocolNameList.add("SetIsWritableByGroup"); // 12
+		for (int j = 0; j < 13; j++) {
+			ProtocolApplication newApp = ct.createProtocolApplication(invName,
+					protocolNameList.get(j));
 			appsToAddList.add(newApp);
 		}
 		db.add(appsToAddList);
 		// Get all measurements
 		List<String> featureNameList = new ArrayList<String>();
-		featureNameList.add("Active");
-		featureNameList.add("Species");
-		featureNameList.add("Sex");
-		featureNameList.add("AnimalType");
-		featureNameList.add("Source");
-		featureNameList.add("Background");
-		featureNameList.add("Line");
-		featureNameList.add("GeneModification");
-		featureNameList.add("GeneState");
-		featureNameList.add("DateOfBirth");
-		featureNameList.add("ResponsibleResearcher");
-		featureNameList.add("Location");
+		featureNameList.add("Active"); // 0
+		featureNameList.add("Species"); // 1
+		featureNameList.add("Sex"); // 2
+		featureNameList.add("AnimalType"); // 3
+		featureNameList.add("Source"); // 4
+		featureNameList.add("Background"); // 5
+		featureNameList.add("Line"); // 6
+		featureNameList.add("GeneModification"); // 7
+		featureNameList.add("GeneState"); // 8
+		featureNameList.add("DateOfBirth"); // 9
+		featureNameList.add("ResponsibleResearcher"); // 10
+		featureNameList.add("Location"); // 11
+		featureNameList.add("IsWritableByUser"); // 12
+		featureNameList.add("IsWritableByGroup"); // 13
 		// Make all values
 		int animalCnt = 0;
-		for (Individual animal : animalsToAddList)
-		{
+		for (Individual animal : animalsToAddList) {
+
 			String animalName = animal.getName();
 			// Set Active, with (start)time = entrydate and endtime = null
 			ProtocolApplication app = appsToAddList.get(0);
-			valuesToAddList.add(ct.createObservedValue(invName, app.getName(), entryDate, null, featureNameList.get(0),
-					animalName, "Alive", null));
+			valuesToAddList.add(ct.createObservedValue(invName, app.getName(),
+					entryDate, null, featureNameList.get(0), animalName,
+					"Alive", null));
 			// Set species
 			app = appsToAddList.get(1);
-			valuesToAddList.add(ct.createObservedValue(invName, app.getName(), entryDate, null, featureNameList.get(1),
-					animalName, null, speciesName));
+			valuesToAddList.add(ct.createObservedValue(invName, app.getName(),
+					entryDate, null, featureNameList.get(1), animalName, null,
+					speciesName));
 			// Set sex
 			String sexName;
-			if (animalCnt < nrOfMales)
-			{
+			if (animalCnt < nrOfMales) {
 				sexName = "Male";
-			}
-			else if (animalCnt < nrOfMales + nrOfFemales)
-			{
+			} else if (animalCnt < nrOfMales + nrOfFemales) {
 				sexName = "Female";
-			}
-			else
-			{
+			} else {
 				sexName = "UnknownSex";
 			}
 			app = appsToAddList.get(2);
-			valuesToAddList.add(ct.createObservedValue(invName, app.getName(), entryDate, null, featureNameList.get(2),
-					animalName, null, sexName));
+			valuesToAddList.add(ct.createObservedValue(invName, app.getName(),
+					entryDate, null, featureNameList.get(2), animalName, null,
+					sexName));
 			// Set animaltype
 			app = appsToAddList.get(3);
-			valuesToAddList.add(ct.createObservedValue(invName, app.getName(), entryDate, null, featureNameList.get(3),
-					animalName, animalType, null));
+			valuesToAddList.add(ct.createObservedValue(invName, app.getName(),
+					entryDate, null, featureNameList.get(3), animalName,
+					animalType, null));
 			// Set source
 			app = appsToAddList.get(4);
-			valuesToAddList.add(ct.createObservedValue(invName, app.getName(), entryDate, null, featureNameList.get(4),
-					animalName, null, sourceName));
+			valuesToAddList.add(ct.createObservedValue(invName, app.getName(),
+					entryDate, null, featureNameList.get(4), animalName, null,
+					sourceName));
 			// Set background
-			if (backgroundName != null && !backgroundName.equals("no background"))
-			{
+			if (backgroundName != null
+					&& !backgroundName.equals("no background")) {
 				app = appsToAddList.get(5);
-				valuesToAddList.add(ct.createObservedValue(invName, app.getName(), entryDate, null,
-						featureNameList.get(5), animalName, null, backgroundName));
+				valuesToAddList.add(ct.createObservedValue(invName,
+						app.getName(), entryDate, null, featureNameList.get(5),
+						animalName, null, backgroundName));
 			}
 			// Set line
-			if (lineName != null && !lineName.equals(""))
-			{
+			if (lineName != null && !lineName.equals("")) {
 				app = appsToAddList.get(6);
-				valuesToAddList.add(ct.createObservedValue(invName, app.getName(), entryDate, null,
-						featureNameList.get(6), animalName, null, lineName));
+				valuesToAddList.add(ct.createObservedValue(invName,
+						app.getName(), entryDate, null, featureNameList.get(6),
+						animalName, null, lineName));
 			}
 			// Set genotype(s)
 			int index = 0;
-			if (genes != null)
-			{
-				for (String gene : genes)
-				{
+			if (genes != null) {
+				for (String gene : genes) {
 					String geneState = genestates.get(index);
 					// Make protocol application
 					app = appsToAddList.get(7);
-					valuesToAddList.add(ct.createObservedValue(invName, app.getName(), entryDate, null,
+					valuesToAddList.add(ct.createObservedValue(invName,
+							app.getName(), entryDate, null,
 							featureNameList.get(7), animalName, gene, null));
-					valuesToAddList.add(ct.createObservedValue(invName, app.getName(), entryDate, null,
-							featureNameList.get(8), animalName, geneState, null));
+					valuesToAddList
+							.add(ct.createObservedValue(invName, app.getName(),
+									entryDate, null, featureNameList.get(8),
+									animalName, geneState, null));
 					index++;
 				}
 			}
 			// Set birthdate
-			if (birthDate != null)
-			{
+			if (birthDate != null) {
 				app = appsToAddList.get(8);
-				valuesToAddList.add(ct.createObservedValue(invName, app.getName(), entryDate, null,
-						featureNameList.get(9), animalName, birthDate, null));
+				valuesToAddList.add(ct.createObservedValue(invName,
+						app.getName(), entryDate, null, featureNameList.get(9),
+						animalName, birthDate, null));
 			}
 			// Set responsible researcher
-			if (resResearcher != null)
-			{
+			if (resResearcher != null) {
 				app = appsToAddList.get(9);
-				valuesToAddList.add(ct.createObservedValue(invName, app.getName(), entryDate, null,
-						featureNameList.get(10), animalName, resResearcher, null));
+				valuesToAddList.add(ct.createObservedValue(invName,
+						app.getName(), entryDate, null,
+						featureNameList.get(10), animalName, resResearcher,
+						null));
 			}
 			// Set location
-			if (locName != null && !locName.equals(""))
-			{
+			if (locName != null && !locName.equals("")) {
 				app = appsToAddList.get(10);
-				valuesToAddList.add(ct.createObservedValue(invName, app.getName(), entryDate, null,
+				valuesToAddList.add(ct.createObservedValue(invName,
+						app.getName(), entryDate, null,
 						featureNameList.get(11), animalName, null, locName));
 			}
+			// Set isWritable by user admin
+			app = appsToAddList.get(11);
+			valuesToAddList.add(ct.createObservedValue(invName, app.getName(),
+					entryDate, null, featureNameList.get(12), animalName,
+					"admin", null));
+			// Set is writable by group "Caretakers"
+
+			// Set isWritable by group Caretakers
+			app = appsToAddList.get(12);
+			valuesToAddList.add(ct.createObservedValue(invName, app.getName(),
+					entryDate, null, featureNameList.get(13), animalName,
+					"Caretakers", null));
+
 			animalCnt++;
 		}
 		db.add(valuesToAddList);
@@ -524,15 +484,18 @@ public class AddAnimalPlugin extends EasyPluginController
 		// Update custom label map now new animals have been added
 		ct.makeObservationTargetNameMap(db.getLogin().getUserName(), true);
 
-		this.setSuccess(animalsToAddList.size() + " animal(s) successfully added");
+		this.setSuccess(animalsToAddList.size()
+				+ " animal(s) successfully added");
 	}
 
-	private void populateFirstTablePanel(Database db) throws DatabaseException, ParseException
-	{
+	private void populateFirstTablePanel(Database db) throws DatabaseException,
+			ParseException {
 
 		ct.setDatabase(db);
-		List<String> investigationNames = ct.getAllUserInvestigationNames(db.getLogin().getUserName());
-		SimpleDateFormat dateOnlyFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.US);
+		List<String> investigationNames = ct.getAllUserInvestigationNames(db
+				.getLogin().getUserName());
+		SimpleDateFormat dateOnlyFormat = new SimpleDateFormat("dd-MM-yyyy",
+				Locale.US);
 
 		// panel for all elements
 		containingPanel = new DivPanel(this.getName() + "panel", "");
@@ -541,8 +504,8 @@ public class AddAnimalPlugin extends EasyPluginController
 		species = new SelectInput("species");
 		species.setLabel("Species:");
 		species.addOption("", "");
-		for (ObservationTarget s : ct.getAllMarkedPanels("Species", investigationNames))
-		{
+		for (ObservationTarget s : ct.getAllMarkedPanels("Species",
+				investigationNames)) {
 			species.addOption(s.getName(), s.getName());
 		}
 		species.setNillable(false);
@@ -550,8 +513,7 @@ public class AddAnimalPlugin extends EasyPluginController
 		species.setTooltip("Give the species.");
 		species.setId("species");
 		species.setOnchange("updateNamePrefixBox();");
-		if (speciesName != null)
-		{
+		if (speciesName != null) {
 			species.setValue(speciesName);
 		}
 
@@ -562,16 +524,17 @@ public class AddAnimalPlugin extends EasyPluginController
 		source = new SelectInput("source");
 		source.setLabel("Source:");
 		source.addOption("", "");
-		List<ObservationTarget> tmpSourceList = ct.getAllMarkedPanels("Source", investigationNames);
-		for (ObservationTarget tmpSource : tmpSourceList)
-		{
-			List<ObservedValue> sourceTypeValueList = db.query(ObservedValue.class)
-					.eq(ObservedValue.TARGET, tmpSource.getId()).eq(ObservedValue.FEATURE_NAME, "SourceType").find();
-			if (sourceTypeValueList.size() > 0)
-			{
+		List<ObservationTarget> tmpSourceList = ct.getAllMarkedPanels("Source",
+				investigationNames);
+		for (ObservationTarget tmpSource : tmpSourceList) {
+			List<ObservedValue> sourceTypeValueList = db
+					.query(ObservedValue.class)
+					.eq(ObservedValue.TARGET, tmpSource.getId())
+					.eq(ObservedValue.FEATURE_NAME, "SourceType").find();
+			if (sourceTypeValueList.size() > 0) {
 				String sourcetype = sourceTypeValueList.get(0).getValue();
-				if (!sourcetype.equals("Eigen fok binnen uw organisatorische werkeenheid"))
-				{
+				if (!sourcetype
+						.equals("Eigen fok binnen uw organisatorische werkeenheid")) {
 					source.addOption(tmpSource.getName(), tmpSource.getName());
 				}
 			}
@@ -579,8 +542,7 @@ public class AddAnimalPlugin extends EasyPluginController
 		source.setDescription("Give the source from which the new animal(s) originate(s).");
 		source.setTooltip("Give the source from which the new animal(s) originate(s).");
 		source.setNillable(false);
-		if (sourceName != null)
-		{
+		if (sourceName != null) {
 			source.setValue(sourceName);
 		}
 
@@ -588,16 +550,14 @@ public class AddAnimalPlugin extends EasyPluginController
 		animaltype = new SelectInput("animaltype");
 		animaltype.setLabel("Animal type:");
 		animaltype.addOption("", "");
-		for (Category c : ct.getAllCodesForFeature("AnimalType"))
-		{
+		for (Category c : ct.getAllCodesForFeature("AnimalType")) {
 			animaltype.addOption(c.getDescription(), c.getDescription());
 		}
 		animaltype
 				.setDescription("Give the type of the new animal(s). Select type 2 (GMO) to modify the genotype of the animal(s).");
 		animaltype.setOnchange("showHideGenotypeDiv(this.value);");
 		animaltype.setNillable(false);
-		if (animalType != null)
-		{
+		if (animalType != null) {
 			animaltype.setValue(animalType);
 		}
 
@@ -605,22 +565,23 @@ public class AddAnimalPlugin extends EasyPluginController
 		birthdate.setLabel("Date of birth (if known):");
 		birthdate.setDescription("The date of birth of the animal(s).");
 		birthdate.setDateFormat("yyyy-MM-dd");
-		birthdate.setJqueryproperties("dateFormat: 'yy-mm-dd', changeMonth: true, changeYear: true, showButtonPanel: true, numberOfMonths: 1");
+		birthdate
+				.setJqueryproperties("dateFormat: 'yy-mm-dd', changeMonth: true, changeYear: true, showButtonPanel: true, numberOfMonths: 1");
 		birthdate.setValue(null);
-		if (birthDate != null)
-		{
+		if (birthDate != null) {
 			birthdate.setValue(dateOnlyFormat.parse(birthDate));
 		}
-		
+
 		entrydate = new DateInput("entrydate");
 		entrydate.setLabel("Date of entry:");
 		entrydate.setNillable(false);
-		entrydate.setDescription("The date of arrival of these animals in the animal facility. This date will be used as start date to count the presence of animals in the yearly report.");
+		entrydate
+				.setDescription("The date of arrival of these animals in the animal facility. This date will be used as start date to count the presence of animals in the yearly report.");
 		entrydate.setDateFormat("yyyy-MM-dd");
-		entrydate.setJqueryproperties("dateFormat: 'yy-mm-dd', changeMonth: true, changeYear: true, showButtonPanel: true, numberOfMonths: 1");
+		entrydate
+				.setJqueryproperties("dateFormat: 'yy-mm-dd', changeMonth: true, changeYear: true, showButtonPanel: true, numberOfMonths: 1");
 		entrydate.setValue(new Date());
-		if (entryDate != null)
-		{
+		if (entryDate != null) {
 			entrydate.setValue(entryDate);
 		}
 
@@ -629,8 +590,7 @@ public class AddAnimalPlugin extends EasyPluginController
 		researcher.setNillable(true);
 		researcher.setDescription("Give the responsible researcher.");
 		researcher.setTooltip("Give the responsible researcher.");
-		if (resResearcher != null)
-		{
+		if (resResearcher != null) {
 			researcher.setValue(resResearcher);
 		}
 
@@ -638,15 +598,13 @@ public class AddAnimalPlugin extends EasyPluginController
 		location = new SelectInput("location");
 		location.setLabel("Location (optional):");
 		location.addOption("", "");
-		for (Location l : ct.getAllLocations())
-		{
+		for (Location l : ct.getAllLocations()) {
 			location.addOption(l.getName(), l.getName());
 		}
 		location.setDescription("Give the location of the new animal(s).");
 		location.setTooltip("Give the location of the new animal(s).");
 		location.setNillable(true);
-		if (locName != null)
-		{
+		if (locName != null) {
 			location.setValue(locName);
 		}
 
@@ -655,7 +613,8 @@ public class AddAnimalPlugin extends EasyPluginController
 		buttonPanel.add(contbutton);
 
 		// add everything to the panel
-		containingPanel.add(new Paragraph("<h2>Bring in animals: set general info</h2>"));
+		containingPanel.add(new Paragraph(
+				"<h2>Bring in animals: set general info</h2>"));
 		containingPanel.add(species);
 		containingPanel.add(source);
 		containingPanel.add(animaltype);
@@ -666,15 +625,17 @@ public class AddAnimalPlugin extends EasyPluginController
 		containingPanel.add(buttonPanel);
 	}
 
-	private void populateSecondTablePanel(Database db) throws DatabaseException, ParseException
-	{
+	private void populateSecondTablePanel(Database db)
+			throws DatabaseException, ParseException {
 
 		ct.setDatabase(db);
 
-		List<String> investigationNames = ct.getAllUserInvestigationNames(db.getLogin().getUserName());
+		List<String> investigationNames = ct.getAllUserInvestigationNames(db
+				.getLogin().getUserName());
 
 		containingPanel = new DivPanel(this.getName() + "panel", "");
-		containingPanel.add(new Paragraph("<h2>Bring in animals: set genotype info</h2>"));
+		containingPanel.add(new Paragraph(
+				"<h2>Bring in animals: set genotype info</h2>"));
 
 		background = new SelectInput("background");
 		background.setLabel("Background:");
@@ -682,17 +643,16 @@ public class AddAnimalPlugin extends EasyPluginController
 		background.setTooltip("Give the genetic background of the animal.");
 		background.addOption("", "");
 		background.addOption("no background", "no background");
-		for (ObservationTarget b : ct.getAllMarkedPanels("Background", investigationNames))
-		{
+		for (ObservationTarget b : ct.getAllMarkedPanels("Background",
+				investigationNames)) {
 			// Only show if background belongs to chosen species
-			if (ct.getMostRecentValueAsXrefName(b.getName(), "Species").equals(speciesName))
-			{
+			if (ct.getMostRecentValueAsXrefName(b.getName(), "Species").equals(
+					speciesName)) {
 				background.addOption(b.getName(), b.getName());
 			}
 		}
 		background.setNillable(false);
-		if (backgroundName != null)
-		{
+		if (backgroundName != null) {
 			background.setValue(backgroundName);
 		}
 		containingPanel.add(background);
@@ -702,34 +662,31 @@ public class AddAnimalPlugin extends EasyPluginController
 		line.setDescription("Give the breeding line of the animal.");
 		line.setTooltip("Give the breeding line of the animal.");
 		line.addOption("", "");
-		for (ObservationTarget l : ct.getAllMarkedPanels("Line", investigationNames))
-		{
+		for (ObservationTarget l : ct.getAllMarkedPanels("Line",
+				investigationNames)) {
 			// Only show if background belongs to chosen species
-			if (ct.getMostRecentValueAsXrefName(l.getName(), "Species").equals(speciesName))
-			{
+			if (ct.getMostRecentValueAsXrefName(l.getName(), "Species").equals(
+					speciesName)) {
 				line.addOption(l.getName(), l.getName());
 			}
 		}
 		line.setNillable(true);
-		if (lineName != null)
-		{
+		if (lineName != null) {
 			line.setValue(lineName);
 		}
 		containingPanel.add(line);
 
-		if (animalType.equals("B. Transgeen dier"))
-		{
+		if (animalType.equals("B. Transgeen dier")) {
 			gene = new SelectMultipleInput("gene");
 			gene.setUseJqueryMultiplePlugin(true);
 			gene.setNillable(false); // to avoid the empty option from showing
 										// up
 			gene.setLabel("Gene(s):");
-			for (String option : ct.getAllCodesForFeatureAsStrings("GeneModification"))
-			{
+			for (String option : ct
+					.getAllCodesForFeatureAsStrings("GeneModification")) {
 				gene.addOption(option, option);
 			}
-			if (genes != null)
-			{
+			if (genes != null) {
 				gene.setValue(genes);
 			}
 			containingPanel.add(gene);
@@ -745,30 +702,26 @@ public class AddAnimalPlugin extends EasyPluginController
 		containingPanel.add(buttonPanel);
 	}
 
-	private void populateThirdTablePanel(Database db) throws DatabaseException, ParseException
-	{
+	private void populateThirdTablePanel(Database db) throws DatabaseException,
+			ParseException {
 
 		ct.setDatabase(db);
 
-
 		containingPanel = new DivPanel(this.getName() + "panel", "");
-		
-		
-		containingPanel.add(new Paragraph("<h2>Bring in animals: set genotype info (II)</h2>"));
+
+		containingPanel.add(new Paragraph(
+				"<h2>Bring in animals: set genotype info (II)</h2>"));
 
 		genestateList = new ArrayList<SelectInput>();
 		List<String> geneList = gene.getObject();
 		int geneNr = 0;
-		for (String geneName : geneList)
-		{
+		for (String geneName : geneList) {
 			SelectInput genestateBox = new SelectInput("genestate_" + geneName);
 			genestateBox.setLabel("State for " + geneName + ":");
-			for (String option : ct.getAllCodesForFeatureAsStrings("GeneState"))
-			{
+			for (String option : ct.getAllCodesForFeatureAsStrings("GeneState")) {
 				genestateBox.addOption(option, option);
 			}
-			if (genestates != null && genestates.get(geneNr) != null)
-			{
+			if (genestates != null && genestates.get(geneNr) != null) {
 				genestateBox.setValue(genestates.get(geneNr));
 			}
 			containingPanel.add(genestateBox);
@@ -786,51 +739,43 @@ public class AddAnimalPlugin extends EasyPluginController
 		containingPanel.add(buttonPanel);
 	}
 
-	private void populateFourthTablePanel(Database db) throws DatabaseException, ParseException
-	{
+	private void populateFourthTablePanel(Database db)
+			throws DatabaseException, ParseException {
 
 		ct.setDatabase(db);
 
 		containingPanel = new DivPanel(this.getName() + "panel", "");
 
-		containingPanel.add(new Paragraph("<h2>Bring in animals: set names and numbers</h2>"));
+		containingPanel.add(new Paragraph(
+				"<h2>Bring in animals: set names and numbers</h2>"));
 
 		String defaultPrefix = "";
 		// TODO: put this hardcoded info in the database (NamePrefix table)
-		if (speciesName.equals("House mouse"))
-		{
+		if (speciesName.equals("House mouse")) {
 			defaultPrefix = "mm_";
 		}
-		if (speciesName.equals("Brown rat"))
-		{
+		if (speciesName.equals("Brown rat")) {
 			defaultPrefix = "rn_";
 		}
-		if (speciesName.equals("Common vole"))
-		{
+		if (speciesName.equals("Common vole")) {
 			defaultPrefix = "mar_";
 		}
-		if (speciesName.equals("Tundra vole"))
-		{
+		if (speciesName.equals("Tundra vole")) {
 			defaultPrefix = "mo_";
 		}
-		if (speciesName.equals("Syrian hamster"))
-		{
+		if (speciesName.equals("Syrian hamster")) {
 			defaultPrefix = "ma_";
 		}
-		if (speciesName.equals("European groundsquirrel"))
-		{
+		if (speciesName.equals("European groundsquirrel")) {
 			defaultPrefix = "sc_";
 		}
-		if (speciesName.equals("Siberian hamster"))
-		{
+		if (speciesName.equals("Siberian hamster")) {
 			defaultPrefix = "ps_";
 		}
-		if (speciesName.equals("Domestic guinea pig"))
-		{
+		if (speciesName.equals("Domestic guinea pig")) {
 			defaultPrefix = "cp_";
 		}
-		if (speciesName.equals("Fat-tailed dunnart"))
-		{
+		if (speciesName.equals("Fat-tailed dunnart")) {
 			defaultPrefix = "sg_";
 		}
 
@@ -840,10 +785,8 @@ public class AddAnimalPlugin extends EasyPluginController
 		namebase.setId("namebase");
 		namebase.setDescription("The default prefix string that will be put in front of your name.");
 		namebase.addOption("New", "New (specify below)");
-		for (String base : bases)
-		{
-			if (!base.equals(""))
-			{
+		for (String base : bases) {
+			if (!base.equals("")) {
 				namebase.addOption(base, base);
 			}
 		}
@@ -853,10 +796,8 @@ public class AddAnimalPlugin extends EasyPluginController
 		startnumberhelper = new TextLineInput<String>("startnumberhelper");
 		startnumberhelper.setLabel("");
 		String helperContents = "1"; // start number for new base
-		for (String base : bases)
-		{
-			if (!base.equals(""))
-			{
+		for (String base : bases) {
+			if (!base.equals("")) {
 				helperContents += (";" + (ct.getHighestNumberForPrefix(base) + 1));
 			}
 		}
@@ -899,19 +840,22 @@ public class AddAnimalPlugin extends EasyPluginController
 		numberofmales.setLabel("Number of males:");
 		numberofmales.setValue(0);
 		numberofmales.setNillable(false);
-		numberofmales.setDescription("Give the number of male animals to add to the database.");
+		numberofmales
+				.setDescription("Give the number of male animals to add to the database.");
 
 		numberoffemales = new IntInput("numberoffemales");
 		numberoffemales.setLabel("Number of females:");
 		numberoffemales.setValue(0);
 		numberoffemales.setNillable(false);
-		numberoffemales.setDescription("Give the number of female animals to add to the database.");
+		numberoffemales
+				.setDescription("Give the number of female animals to add to the database.");
 
 		numberofunknowns = new IntInput("numberofunknowns");
 		numberofunknowns.setLabel("Number of animals of unknown sex:");
 		numberofunknowns.setValue(0);
 		numberofunknowns.setNillable(false);
-		numberofunknowns.setDescription("Give the number of animals of unkowon sex to add to the database.");
+		numberofunknowns
+				.setDescription("Give the number of animals of unkowon sex to add to the database.");
 
 		DivPanel buttonPanel = new DivPanel("buttonPanel4", "", false);
 		ActionInput cancelbutton = new ActionInput("Cancel", "", "Cancel");
@@ -931,8 +875,7 @@ public class AddAnimalPlugin extends EasyPluginController
 		containingPanel.add(buttonPanel);
 	}
 
-	public ScreenView getView()
-	{
+	public ScreenView getView() {
 		MolgenisForm view = new MolgenisForm(this);
 		view.add(this.containingPanel);
 		return view;

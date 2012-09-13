@@ -1,0 +1,16 @@
+group__name,role__name
+adbsystem,researchers
+removeAnimals,researchers
+dec,researchers
+researchers,r1
+caretakers,c1
+systemAdmins,sysa1
+breeding,caretakers
+importAnimals,caretakers
+adbsystem,caretakers
+removeAnimals,caretakers
+settings,facilityAdmins
+caretakers,facilityAdmins
+researchers,facilityAdmins
+userManagement,facilityAdmins
+

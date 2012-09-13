@@ -1,0 +1,14 @@
+group__name;role__name
+system;admin
+AllUsers;admin
+AllUsers;anonymous
+AllUsers;a
+system;researchers
+removeAnimals;researchers
+dec;researchers
+AllUsers;r1
+researchers;r1
+AllUsers;c1
+caretakers;c1
+AllUsers;sysa1
+systemAdmins;sysa1
