@@ -5,14 +5,18 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.molgenis.auth.MolgenisRoleGroupLink;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
 import org.molgenis.framework.db.Query;
+import org.molgenis.framework.db.QueryRule;
+import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.matrix.MatrixException;
 import org.molgenis.matrix.component.general.MatrixQueryRule;
 import org.molgenis.matrix.component.interfaces.BasicMatrix;
 import org.molgenis.matrix.component.interfaces.DatabaseMatrix;
 import org.molgenis.matrix.component.interfaces.SliceableMatrix;
+import org.molgenis.pheno.ObservableFeature;
 import org.molgenis.pheno.ObservationElement;
 import org.molgenis.pheno.ObservedValue;
 
@@ -208,11 +212,6 @@ public class SliceablePhenoMatrix<R extends ObservationElement, C extends Observ
 				// ignore all other rules
 			}
 
-			// try to add a subquery for securityrules here.
-
-			Query<ObservedValue> securityQuery = (Query<ObservedValue>) db
-					.query(this.getValueClass());
-
 			// add each subquery as condition on
 			// ObservedValue.FEATURE/ObservedValue.TARGET
 			for (Query<ObservedValue> q : subQueries.values()) {
@@ -223,9 +222,46 @@ public class SliceablePhenoMatrix<R extends ObservationElement, C extends Observ
 								: ObservedValue.FEATURE) + " "
 						+ sql.substring(sql.indexOf("FROM"));
 				// use QueryRule.Operator.IN_SUBQUERY
+
 				xQuery.subquery(ObservationElement.ID, sql);
-				System.out.println("SQL: " + sql);
 			}
+
+			Query<ObservedValue> q = db.query(ObservedValue.class);
+			String sql2 = q.createFindSql();
+			sql2 = "SELECT ObservedValue."
+					+ (xClass.equals(rowClass) ? ObservedValue.TARGET
+							: ObservedValue.FEATURE) + " "
+					+ sql2.substring(sql2.indexOf("FROM"));
+
+			System.out.println("SQL before: " + sql2);
+
+			// ObservedValue.Feature = '255' AND (ObservedValue.value =
+			// 'Researcher' OR ObservedValue.value = 'AllUsers' OR
+			// ObservedValue.value = 'Caretakers');
+			ObservableFeature isWritableByGroup = db.find(
+					ObservableFeature.class,
+					new QueryRule(ObservableFeature.NAME, Operator.EQUALS,
+							"IsWritableByGroup")).get(0);
+
+			List<MolgenisRoleGroupLink> userGroupLinks = db.find(
+					MolgenisRoleGroupLink.class, new QueryRule(
+							MolgenisRoleGroupLink.ROLE_, Operator.EQUALS, db
+									.getLogin().getUserId()));
+
+			String orGroupStukje = "(ObservedValue.value = '"
+					+ userGroupLinks.get(0).getGroup_Name() + "'";
+			for (int i = 1; i < userGroupLinks.size(); i++) {
+				orGroupStukje += " OR ObservedValue.value = '"
+						+ userGroupLinks.get(i).getGroup_Name() + "'";
+			}
+			orGroupStukje += ")";
+
+			sql2 += " WHERE ObservedValue.Feature = '"
+					+ isWritableByGroup.getId() + "' AND " + orGroupStukje;
+
+			System.out.println("SQL after: " + sql2);
+
+			xQuery.subquery(ObservationElement.ID, sql2);
 
 			// add limit and offset, unless count
 			if (!countAll) {
