@@ -159,15 +159,11 @@ public class ListPluginMatrix extends EasyPluginController {
 				MatrixQueryRule mqr1 = new MatrixQueryRule(
 						MatrixQueryRule.Type.colValueProperty,
 						cs.getMeasurementId("IsWritableByGroup"),
-						ObservedValue.VALUE, Operator.EQUALS, "caretakers");
+						ObservedValue.VALUE, Operator.EQUALS, "researchers");
 
-				MatrixQueryRule mqr3 = new MatrixQueryRule(
-						MatrixQueryRule.Type.colValueProperty,
-						cs.getMeasurementId("IsWritableByUser"),
-						ObservedValue.VALUE, Operator.EQUALS, "admin");
 				// filterRules.add(new MatrixQueryRule(mqr1, mqr3));
 				// filterRules.add(new MatrixQueryRule(mqr1, mqr3));
-				// filterRules.add(mqr2);
+				// filterRules.add(mqr1);
 
 				filterRules.add(new MatrixQueryRule(
 						MatrixQueryRule.Type.colValueProperty, cs
