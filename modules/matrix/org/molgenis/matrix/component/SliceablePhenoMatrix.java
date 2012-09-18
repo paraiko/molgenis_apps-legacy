@@ -186,53 +186,6 @@ public class SliceablePhenoMatrix<R extends ObservationElement, C extends Observ
 			// observedvalue where feature = 1 AND value > 10 AND target in
 			// (select target from observedvalue ));
 
-			// Impl B: create subquery per column, order matters because of
-			// sorting (not supported).
-			Map<Integer, Query<ObservedValue>> subQueries = new LinkedHashMap<Integer, Query<ObservedValue>>();
-			for (MatrixQueryRule rule : rules) {
-				// only add colValues / rowValues as subquery
-				if (rule.getFilterType().equals(xValuePropertyFilterType)) {
-					// create a new subquery for each colValues column
-					if (subQueries.get(rule.getDimIndex()) == null) {
-						@SuppressWarnings("unchecked")
-						Query<ObservedValue> subQuery = (Query<ObservedValue>) db
-								.query(this.getValueClass());
-						// filter on data
-						// if(data != null)
-						// subQuery.eq(TextDataElement.DATA, data.getIdValue());
-						// filter on the column/row
-						subQuery.eq(
-								xValuePropertyFilterType == MatrixQueryRule.Type.colValueProperty ? ObservedValue.FEATURE
-										: ObservedValue.TARGET, rule
-										.getDimIndex());
-						subQueries.put(rule.getDimIndex(), subQuery);
-					}
-					subQueries.get(rule.getDimIndex()).addRules(rule);
-					// subQueries.g
-
-				}
-				// ignore all other rules
-			}
-
-			// Qreate new security queryrule here and add it to the
-			// subqueries:
-			// QueryRule securityRule1 = new QueryRule(
-			// "isWritableByGroup", Operator.EQUALS, "Researchers");
-
-			// @SuppressWarnings("unchecked")
-			// Query<ObservedValue> subQuery = (Query<ObservedValue>) db
-			// .query(this.getValueClass());
-			// subQuery.eq(
-			// xValuePropertyFilterType == MatrixQueryRule.Type.colValueProperty
-			// ? ObservedValue.FEATURE
-			// : ObservedValue.TARGET, Integer.valueOf(rules.size()+1));
-
-			// subQueries.put(Integer.valueOf(rules.size()+1), subQuery);
-			// String securitySQL =
-			// "SELECT ObservedValue.Target FROM ObservedValue  LEFT JOIN Investigation AS xref_Investigation  ON xref_Investigation.id = ObservedValue.Investigation LEFT JOIN ProtocolApplication AS xref_protocolApplication  ON xref_protocolApplication.id = ObservedValue.protocolApplication LEFT JOIN ObservationElement AS xref_Feature  ON xref_Feature.id = ObservedValue.Feature LEFT JOIN ObservationElement AS xref_Target  ON xref_Target.id = ObservedValue.Target LEFT JOIN OntologyTerm AS xref_ontologyReference  ON xref_ontologyReference.id = ObservedValue.ontologyReference LEFT JOIN ObservationElement AS xref_relation  ON xref_relation.id = ObservedValue.relation WHERE ObservedValue.Feature = '255' AND ObservedValue.value = 'Caretakers'";
-			// (ObservedValue.value = 'Caretakers' OR ObservedValue.value =
-			// 'Researchers')
-
 			// Create the filters for row level security based on UserGroup
 			// (only is writable group for now )
 			Query<ObservedValue> sq = db.query(ObservedValue.class);
@@ -241,8 +194,6 @@ public class SliceablePhenoMatrix<R extends ObservationElement, C extends Observ
 					+ (xClass.equals(rowClass) ? ObservedValue.TARGET
 							: ObservedValue.FEATURE) + " "
 					+ securitySQL.substring(securitySQL.indexOf("FROM"));
-
-			System.out.println("SQL before: " + securitySQL);
 			ObservableFeature isWritableByGroup = db.find(
 					ObservableFeature.class,
 					new QueryRule(ObservableFeature.NAME, Operator.EQUALS,
@@ -264,24 +215,64 @@ public class SliceablePhenoMatrix<R extends ObservationElement, C extends Observ
 			securitySQL += " WHERE ObservedValue.Feature = '"
 					+ isWritableByGroup.getId() + "' AND " + orGroupStukje;
 
-			System.out.println("SQL after: " + securitySQL);
+			System.out.println("SetSecurity filters: " + securitySQL);
+
+			// Impl B: create subquery per column, order matters because of
+			// sorting (not supported).
+
+			Map<Integer, Query<ObservedValue>> subQueries = new LinkedHashMap<Integer, Query<ObservedValue>>();
+			for (MatrixQueryRule rule : rules) {
+				// only add colValues / rowValues as subquery
+				if (rule.getFilterType().equals(xValuePropertyFilterType)) {
+					// create a new subquery for each colValues column
+					if (subQueries.get(rule.getDimIndex()) == null) {
+
+						@SuppressWarnings("unchecked")
+						Query<ObservedValue> subQuery = (Query<ObservedValue>) db
+								.query(this.getValueClass());
+						// filter on data
+						// if(data != null)
+						// subQuery.eq(TextDataElement.DATA, data.getIdValue());
+						// filter on the column/row
+						subQuery.eq(
+								xValuePropertyFilterType == MatrixQueryRule.Type.colValueProperty ? ObservedValue.FEATURE
+										: ObservedValue.TARGET, rule
+										.getDimIndex());
+						subQueries.put(rule.getDimIndex(), subQuery);
+					}
+					subQueries.get(rule.getDimIndex()).addRules(rule);
+					// subQueries.g
+
+				}
+				// ignore all other rules
+			}
 
 			// add each subquery as condition on
 			// ObservedValue.FEATURE/ObservedValue.TARGET
-			for (Query<ObservedValue> q : subQueries.values()) {
-				String sql = q.createFindSql();
-				// strip 'select ... from' and replace with 'select id from'
-				sql = "SELECT ObservedValue."
-						+ (xClass.equals(rowClass) ? ObservedValue.TARGET
-								: ObservedValue.FEATURE) + " "
-						+ sql.substring(sql.indexOf("FROM"));
-				// use QueryRule.Operator.IN_SUBQUERY
+			if (subQueries.isEmpty()) {
+				// if there are no other filters, still add the security filters
+				// anyway.
+				// xQuery.subquery(ObservationElement.ID, securitySQL);
+				System.out
+						.println("\n #################### Been there, done that......\n");
 
-				// add the security filters first
-				xQuery.subquery(ObservationElement.ID, securitySQL);
-				// then add the new filters
-				xQuery.subquery(ObservationElement.ID, sql);
+			} else {
+				for (Query<ObservedValue> q : subQueries.values()) {
+					String sql = q.createFindSql();
+					xQuery.subquery(ObservationElement.ID, securitySQL);
+					// strip 'select ... from' and replace with 'select id from'
+					sql = "SELECT ObservedValue."
+							+ (xClass.equals(rowClass) ? ObservedValue.TARGET
+									: ObservedValue.FEATURE) + " "
+							+ sql.substring(sql.indexOf("FROM"));
+					// use QueryRule.Operator.IN_SUBQUERY
 
+					// add the security filters first
+					xQuery.subquery(ObservationElement.ID, securitySQL);
+					// then add the new filters
+					xQuery.subquery(ObservationElement.ID, sql);
+
+				}
 			}
 
 			if (!countAll) {
