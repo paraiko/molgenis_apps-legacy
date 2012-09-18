@@ -55,6 +55,7 @@ public class ListPluginMatrix extends EasyPluginController {
 	public Show handleRequest(Database db, Tuple request, OutputStream out) {
 		if (targetMatrixViewer != null) {
 			targetMatrixViewer.setDatabase(db);
+			targetMatrixViewer.setAPPLICATION_STRING("ANIMALDB");
 		}
 
 		reload = true;
@@ -131,12 +132,12 @@ public class ListPluginMatrix extends EasyPluginController {
 				measurementsToShow.add("OldRhutDbAnimalId");
 				measurementsToShow.add("Location");
 				measurementsToShow.add("Background");
+
 				// FIXME temperarily add security measurements to view during
 				// development
-				measurementsToShow.add("IsReadableByUser");
-				measurementsToShow.add("IsWritableByUser");
-				measurementsToShow.add("IsReadableByGroup");
 				measurementsToShow.add("IsWritableByGroup");
+				// measurementsToShow.add("Remark");
+
 				// measurementsToShow.add("Remark");
 
 				List<MatrixQueryRule> filterRules = new ArrayList<MatrixQueryRule>();
@@ -182,6 +183,9 @@ public class ListPluginMatrix extends EasyPluginController {
 									Individual.class, Measurement.class), true,
 							0, true, false, filterRules, null, true);
 
+					// enable animalDB specific traits (sorting filtering etc)
+					targetMatrixViewer.setAPPLICATION_STRING("ANIMALDB");
+
 					// restore paging
 					targetMatrixViewer.getMatrix().setRowOffset(oldOffset);
 					targetMatrixViewer.getMatrix().setRowLimit(oldLimit);
@@ -218,6 +222,9 @@ public class ListPluginMatrix extends EasyPluginController {
 							new SliceablePhenoMatrix<Individual, Measurement>(
 									Individual.class, Measurement.class), true,
 							0, true, false, filterRules, measurements, false);
+
+					// enable animalDB specific traits (sorting filtering etc)
+					targetMatrixViewer.setAPPLICATION_STRING("ANIMALDB");
 
 					// restore paging
 					targetMatrixViewer.getMatrix().setRowOffset(oldOffset);
