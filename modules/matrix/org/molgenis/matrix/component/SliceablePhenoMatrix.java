@@ -201,10 +201,10 @@ public class SliceablePhenoMatrix<R extends ObservationElement, C extends Observ
 					+ (xClass.equals(rowClass) ? ObservedValue.TARGET
 							: ObservedValue.FEATURE) + " "
 					+ securitySQL.substring(securitySQL.indexOf("FROM"));
-			ObservableFeature isWritableByGroup = db.find(
+			ObservableFeature isWritableByMolgenisRole = db.find(
 					ObservableFeature.class,
 					new QueryRule(ObservableFeature.NAME, Operator.EQUALS,
-							"IsWritableByGroup")).get(0);
+							"IsWritableByMolgenisRole")).get(0);
 
 			List<MolgenisRoleGroupLink> userGroupLinks = db.find(
 					MolgenisRoleGroupLink.class, new QueryRule(
@@ -220,7 +220,8 @@ public class SliceablePhenoMatrix<R extends ObservationElement, C extends Observ
 			orGroupStukje += ")";
 
 			securitySQL += " WHERE ObservedValue.Feature = '"
-					+ isWritableByGroup.getId() + "' AND " + orGroupStukje;
+					+ isWritableByMolgenisRole.getId() + "' AND "
+					+ orGroupStukje;
 
 			// System.out.println("hoe vaak komt deze query voorbij???? "
 			// + securitySQL);

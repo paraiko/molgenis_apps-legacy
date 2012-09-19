@@ -348,9 +348,9 @@ public class AddAnimalPlugin extends EasyPluginController {
 		protocolNameList.add("SetDateOfBirth"); // 8
 		protocolNameList.add("SetResponsibleResearcher"); // 9
 		protocolNameList.add("SetLocation"); // 10
-		protocolNameList.add("SetIsWritableByUser"); // 11
-		protocolNameList.add("SetIsWritableByGroup"); // 12
-		for (int j = 0; j < 13; j++) {
+		protocolNameList.add("SetIsWritableByMolgenisRole"); // 11
+		// protocolNameList.add("SetIsWritableByGroup"); // 12
+		for (int j = 0; j < 12; j++) {
 			ProtocolApplication newApp = ct.createProtocolApplication(invName,
 					protocolNameList.get(j));
 			appsToAddList.add(newApp);
@@ -370,8 +370,8 @@ public class AddAnimalPlugin extends EasyPluginController {
 		featureNameList.add("DateOfBirth"); // 9
 		featureNameList.add("ResponsibleResearcher"); // 10
 		featureNameList.add("Location"); // 11
-		featureNameList.add("IsWritableByUser"); // 12
-		featureNameList.add("IsWritableByGroup"); // 13
+		featureNameList.add("IsWritableByMolgenisRole"); // 12
+		// featureNameList.add("IsWritableByGroup"); // 13
 		// Make all values
 		int animalCnt = 0;
 		for (Individual animal : animalsToAddList) {
@@ -464,18 +464,15 @@ public class AddAnimalPlugin extends EasyPluginController {
 						app.getName(), entryDate, null,
 						featureNameList.get(11), animalName, null, locName));
 			}
-			// Set isWritable by user admin
+
+			// Set isWritable by group Caretakers isWritable by user admin
 			app = appsToAddList.get(11);
 			valuesToAddList.add(ct.createObservedValue(invName, app.getName(),
 					entryDate, null, featureNameList.get(12), animalName,
-					"admin", null));
-			// Set is writable by group "Caretakers"
-
-			// Set isWritable by group Caretakers
-			app = appsToAddList.get(12);
-			valuesToAddList.add(ct.createObservedValue(invName, app.getName(),
-					entryDate, null, featureNameList.get(13), animalName,
 					"Caretakers", null));
+			valuesToAddList.add(ct.createObservedValue(invName, app.getName(),
+					entryDate, null, featureNameList.get(12), animalName,
+					"admin", null));
 
 			animalCnt++;
 		}

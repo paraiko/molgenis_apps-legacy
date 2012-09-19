@@ -135,7 +135,7 @@ public class ListPluginMatrix extends EasyPluginController {
 
 				// FIXME temperarily add security measurements to view during
 				// development
-				measurementsToShow.add("IsWritableByGroup");
+				measurementsToShow.add("IsWritableByMolgenisRole");
 				// measurementsToShow.add("Remark");
 
 				// measurementsToShow.add("Remark");
@@ -155,16 +155,6 @@ public class ListPluginMatrix extends EasyPluginController {
 				// q.addRules(new QueryRule(qr1, qr2, qr3)); // only user's own
 				// OR System investigation
 				// return q.find();
-
-				List<MatrixQueryRule> mq = new ArrayList<MatrixQueryRule>();
-				MatrixQueryRule mqr1 = new MatrixQueryRule(
-						MatrixQueryRule.Type.colValueProperty,
-						cs.getMeasurementId("IsWritableByGroup"),
-						ObservedValue.VALUE, Operator.EQUALS, "researchers");
-
-				// filterRules.add(new MatrixQueryRule(mqr1, mqr3));
-				// filterRules.add(new MatrixQueryRule(mqr1, mqr3));
-				// filterRules.add(mqr1);
 
 				filterRules.add(new MatrixQueryRule(
 						MatrixQueryRule.Type.colValueProperty, cs
