@@ -212,8 +212,8 @@ public class SliceablePhenoMatrix<R extends ObservationElement, C extends Observ
 									.getLogin().getUserId()));
 
 			String orGroupStukje = "(ObservedValue.value = '"
-					+ userGroupLinks.get(0).getGroup_Name() + "'";
-			for (int i = 1; i < userGroupLinks.size(); i++) {
+					+ db.getLogin().getUserName() + "'";
+			for (int i = 0; i < userGroupLinks.size(); i++) {
 				orGroupStukje += " OR ObservedValue.value = '"
 						+ userGroupLinks.get(i).getGroup_Name() + "'";
 			}
