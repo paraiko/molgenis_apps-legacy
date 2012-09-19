@@ -151,6 +151,9 @@ public class SliceablePhenoMatrix<R extends ObservationElement, C extends Observ
 		// B. filter on colValue: 1 subquery per column
 		// C. filter on rowOffset and rowLimit
 		try {
+			boolean isColClass = false; // boolean to know if we are in a col or
+										// rowclass later, security filters
+										// should only be added on rows.
 			// parameterize the refresh of the dim, either TARGET or FEATURE
 			MatrixQueryRule.Type xIndexFilterType = MatrixQueryRule.Type.rowIndex;
 			MatrixQueryRule.Type xHeaderFilterType = MatrixQueryRule.Type.rowHeader;
@@ -158,6 +161,7 @@ public class SliceablePhenoMatrix<R extends ObservationElement, C extends Observ
 			// MatrixQueryRule.Type.colValues;
 			MatrixQueryRule.Type xValuePropertyFilterType = MatrixQueryRule.Type.colValueProperty;
 			if (xClass.equals(getColClass())) {
+				isColClass = true;
 				xIndexFilterType = MatrixQueryRule.Type.colIndex;
 				xHeaderFilterType = MatrixQueryRule.Type.colHeader;
 				// xValuesFilterType = MatrixQueryRule.Type.rowValues;
@@ -188,6 +192,9 @@ public class SliceablePhenoMatrix<R extends ObservationElement, C extends Observ
 
 			// Create the filters for row level security based on UserGroup
 			// (only is writable group for now )
+
+			// FIXME: we now query for user group in every query, this should be
+			// done once and passed in as parameters to optimize..
 			Query<ObservedValue> sq = db.query(ObservedValue.class);
 			String securitySQL = sq.createFindSql();
 			securitySQL = "SELECT ObservedValue."
@@ -215,15 +222,19 @@ public class SliceablePhenoMatrix<R extends ObservationElement, C extends Observ
 			securitySQL += " WHERE ObservedValue.Feature = '"
 					+ isWritableByGroup.getId() + "' AND " + orGroupStukje;
 
-			System.out.println("SetSecurity filters: " + securitySQL);
+			// System.out.println("hoe vaak komt deze query voorbij???? "
+			// + securitySQL);
 
 			// Impl B: create subquery per column, order matters because of
 			// sorting (not supported).
-
+			boolean noVPRules = true;
 			Map<Integer, Query<ObservedValue>> subQueries = new LinkedHashMap<Integer, Query<ObservedValue>>();
 			for (MatrixQueryRule rule : rules) {
-				// only add colValues / rowValues as subquery
+
 				if (rule.getFilterType().equals(xValuePropertyFilterType)) {
+					noVPRules = false; // toggle the flag for value properties
+										// filters later, so security is not
+										// added twice
 					// create a new subquery for each colValues column
 					if (subQueries.get(rule.getDimIndex()) == null) {
 
@@ -242,37 +253,36 @@ public class SliceablePhenoMatrix<R extends ObservationElement, C extends Observ
 					}
 					subQueries.get(rule.getDimIndex()).addRules(rule);
 					// subQueries.g
-
 				}
 				// ignore all other rules
+
 			}
 
 			// add each subquery as condition on
 			// ObservedValue.FEATURE/ObservedValue.TARGET
-			if (subQueries.isEmpty()) {
-				// if there are no other filters, still add the security filters
-				// anyway.
-				// xQuery.subquery(ObservationElement.ID, securitySQL);
-				System.out
-						.println("\n #################### Been there, done that......\n");
+			for (Query<ObservedValue> q : subQueries.values()) {
+				String sql = q.createFindSql();
+				// System.out.println("\nsql1....." + sql);
 
-			} else {
-				for (Query<ObservedValue> q : subQueries.values()) {
-					String sql = q.createFindSql();
-					xQuery.subquery(ObservationElement.ID, securitySQL);
-					// strip 'select ... from' and replace with 'select id from'
-					sql = "SELECT ObservedValue."
-							+ (xClass.equals(rowClass) ? ObservedValue.TARGET
-									: ObservedValue.FEATURE) + " "
-							+ sql.substring(sql.indexOf("FROM"));
-					// use QueryRule.Operator.IN_SUBQUERY
+				// strip 'select ... from' and replace with 'select id from'
+				sql = "SELECT ObservedValue."
+						+ (xClass.equals(rowClass) ? ObservedValue.TARGET
+								: ObservedValue.FEATURE) + " "
+						+ sql.substring(sql.indexOf("FROM"));
+				// use QueryRule.Operator.IN_SUBQUERY
 
-					// add the security filters first
-					xQuery.subquery(ObservationElement.ID, securitySQL);
-					// then add the new filters
-					xQuery.subquery(ObservationElement.ID, sql);
+				// add the security filters
+				xQuery.subquery(ObservationElement.ID, securitySQL);
+				// then add the new filters
+				xQuery.subquery(ObservationElement.ID, sql);
+				// System.out.println("\nsql2....." + sql);
 
-				}
+			}
+			if (noVPRules && !isColClass) {
+
+				// there are no valueproperty filters. add rowsecurity filters
+				// here instead.
+				xQuery.subquery(ObservationElement.ID, securitySQL);
 			}
 
 			if (!countAll) {
