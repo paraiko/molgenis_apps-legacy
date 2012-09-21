@@ -477,6 +477,11 @@ public class Breedingnew extends PluginModel<Entity> {
 				valuesToAddList.add(ct.createObservedValue(invName,
 						app.getName(), eventDate, null, "Certain", parentName,
 						valueString, null));
+				// add security measurements
+				valuesToAddList.add(ct.createObservedValue(invName,
+						app.getName(), eventDate, null, "Certain", parentName,
+						valueString, null));
+
 			} else {
 
 			}
@@ -656,12 +661,6 @@ public class Breedingnew extends PluginModel<Entity> {
 								y = request.getString("remarks"
 										+ entry.getKey());
 							}
-							System.out.println("Date string"
-									+ request.getString("startdate"
-											+ entry.getKey()));
-							System.out.println("Date date"
-									+ request.getString("startdate"
-											+ entry.getKey()));
 
 							pgNames.add(AddParentgroup2(db, request,
 									entry.getValue(),
@@ -699,9 +698,7 @@ public class Breedingnew extends PluginModel<Entity> {
 					}
 				}
 			} catch (Exception e) {
-				logger.error(e);
 				e.printStackTrace();
-				System.out.println(e);
 				// this.setMessages(new
 				// ScreenMessage("Not all fathers or mothers are filled in",
 				// false));
@@ -1212,11 +1209,26 @@ public class Breedingnew extends PluginModel<Entity> {
 		// Make or update name prefix entry
 		ct.updatePrefix("parentgroup", groupPrefix, groupNr);
 		// Mark group as parent group using a special event
-		db.add(ct.createObservedValueWithProtocolApplication(invName, now,
-				null, "SetTypeOfGroup", "TypeOfGroup", groupName,
+
+		// Init list that we can later add to the DB at once
+		List<ObservedValue> valuesToAddList = new ArrayList<ObservedValue>();
+
+		valuesToAddList.add(ct.createObservedValueWithProtocolApplication(
+				invName, now, null, "SetTypeOfGroup", "TypeOfGroup", groupName,
 				"Parentgroup", null));
-		db.add(ct.createObservedValueWithProtocolApplication(invName, now,
+		valuesToAddList.add(ct.createObservedValueWithProtocolApplication(invName, now,
 				null, "SetLine", "Line", groupName, null, line));
+		// add security measurements
+		valuesToAddList.add(ct.createObservedValueWithProtocolApplication(
+				invName, now, null, "SetIsWritableByMolgenisRole",
+				"IsWritableByMolgenisRole", groupName, "admin", null));
+		valuesToAddList.add(ct.createObservedValueWithProtocolApplication(
+				invName, now, null, "SetIsWritableByMolgenisRole",
+				"IsWritableByMolgenisRole", groupName, "Caretakers", null));
+		valuesToAddList.add(ct.createObservedValueWithProtocolApplication(
+				invName, now, null, "SetIsWritableByMolgenisRole",
+				"IsWritableByMolgenisRole", groupName, "panel_" + line, null));
+
 		// Add parent(s)
 		AddParents(db, mama, "SetParentgroupMother", "ParentgroupMother",
 				groupName, eventDate);
@@ -1225,19 +1237,22 @@ public class Breedingnew extends PluginModel<Entity> {
 		// Set line
 
 		// Set start date
-		db.add(ct.createObservedValueWithProtocolApplication(invName, now,
-				null, "SetStartDate", "StartDate", groupName,
+		valuesToAddList.add(ct.createObservedValueWithProtocolApplication(
+				invName, now, null, "SetStartDate", "StartDate", groupName,
 				dbFormat.format(eventDate), null));
 		// Set remarks
 		if (remarks != null) {
-			db.add(ct.createObservedValueWithProtocolApplication(invName, now,
-					null, "SetRemark", "Remark", groupName, remarks, null));
+			valuesToAddList.add(ct.createObservedValueWithProtocolApplication(
+					invName, now, null, "SetRemark", "Remark", groupName,
+					remarks, null));
 		}
 
 		// Add Set Active, with (start)time = entrydate and endtime = null
-		db.add(ct.createObservedValueWithProtocolApplication(invName, now,
-				null, "SetActive", "Active", groupName, "Active", null));
+		valuesToAddList.add(ct.createObservedValueWithProtocolApplication(
+				invName, now, null, "SetActive", "Active", groupName, "Active",
+				null));
 
+		db.add(valuesToAddList); // add all values to the db
 		return groupName;
 	}
 
@@ -1387,6 +1402,9 @@ public class Breedingnew extends PluginModel<Entity> {
 		return "Error: no parentgoup selected";
 	}
 
+	/*
+	 * Adds a new litter to the database
+	 */
 	private String ApplyAddLitter(Database db, Tuple request) throws Exception {
 		Date now = new Date();
 
@@ -1413,6 +1431,7 @@ public class Breedingnew extends PluginModel<Entity> {
 				null, "SetTypeOfGroup", "TypeOfGroup", litterName, "Litter",
 				null));
 		// Apply other fields using event
+
 		ProtocolApplication app = ct.createProtocolApplication(invName,
 				"SetLitterSpecs");
 		db.add(app);
@@ -1455,6 +1474,18 @@ public class Breedingnew extends PluginModel<Entity> {
 		// Active
 		valuesToAddList.add(ct.createObservedValue(invName, paName, eventDate,
 				null, "Active", litterName, "Active", null));
+
+		// add security measurements
+		valuesToAddList.add(ct.createObservedValueWithProtocolApplication(
+				invName, now, null, "SetIsWritableByMolgenisRole",
+				"IsWritableByMolgenisRole", litterName, "admin", null));
+		valuesToAddList.add(ct.createObservedValueWithProtocolApplication(
+				invName, now, null, "SetIsWritableByMolgenisRole",
+				"IsWritableByMolgenisRole", litterName, "Caretakers", null));
+		valuesToAddList.add(ct.createObservedValueWithProtocolApplication(
+				invName, now, null, "SetIsWritableByMolgenisRole",
+				"IsWritableByMolgenisRole", litterName, "panel_" + line, null));
+
 		// Add everything to DB
 		db.add(valuesToAddList);
 
