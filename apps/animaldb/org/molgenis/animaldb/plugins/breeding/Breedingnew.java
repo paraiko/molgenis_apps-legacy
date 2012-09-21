@@ -442,8 +442,9 @@ public class Breedingnew extends PluginModel<Entity> {
 			Date eventDate) throws DatabaseException, ParseException,
 			IOException {
 
-		String invName = ct.getOwnUserInvestigationNames(
-				this.getLogin().getUserName()).get(0);
+		// String invName = ct.getOwnUserInvestigationNames(
+		// this.getLogin().getUserName()).get(0);
+		String invName = "System"; // TODO remove old investigation code above
 
 		// Init lists that we can later add to the DB at once
 		List<ObservedValue> valuesToAddList = new ArrayList<ObservedValue>();
@@ -1194,8 +1195,9 @@ public class Breedingnew extends PluginModel<Entity> {
 			List<String> papa, List<String> mama, String startdate,
 			String remarks) throws Exception {
 		Date now = new Date();
-		String invName = ct.getOwnUserInvestigationNames(
-				this.getLogin().getUserName()).get(0);
+		// String invName = ct.getOwnUserInvestigationNames(
+		// this.getLogin().getUserName()).get(0);
+		String invName = "System"; // TODO remove old investigation code above
 
 		System.out.println("#### " + invName); // temp logger
 
@@ -1391,7 +1393,8 @@ public class Breedingnew extends PluginModel<Entity> {
 		setUserFields(request, false);
 		Date eventDate = newDateOnlyFormat.parse(birthdate);
 		String userName = this.getLogin().getUserName();
-		String invName = ct.getOwnUserInvestigationNames(userName).get(0);
+		// String invName = ct.getOwnUserInvestigationNames(userName).get(0);
+		String invName = "System"; // TODO remove old investigation code above
 		String lineName = ct.getMostRecentValueAsXrefName(selectedParentgroup,
 				"Line");
 		// Init lists that we can later add to the DB at once

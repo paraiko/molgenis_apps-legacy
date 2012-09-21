@@ -127,8 +127,10 @@ public class LocationManagementPlugin extends PluginModel<Entity> {
 		}
 
 		try {
-			String invName = ct.getOwnUserInvestigationNames(
-					this.getLogin().getUserName()).get(0);
+			// String invName = ct.getOwnUserInvestigationNames(
+			// this.getLogin().getUserName()).get(0);
+			String invName = "System"; // TODO remove old investigation code
+										// above
 			action = request.getString("__action");
 
 			if (animalsInLocMatrixViewer != null

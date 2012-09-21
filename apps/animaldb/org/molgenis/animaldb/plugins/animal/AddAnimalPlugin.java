@@ -314,7 +314,8 @@ public class AddAnimalPlugin extends EasyPluginController {
 		// String invName = ct.getOwnUserInvestigationNames(userName).get(0);
 		String invName = "System"; // write all animals on the system
 									// investigation so everybody can reach
-									// them.
+									// them. TODO remove old investigation code
+									// above
 
 		// Init lists that we can later add to the DB at once
 		List<ObservedValue> valuesToAddList = new ArrayList<ObservedValue>();
