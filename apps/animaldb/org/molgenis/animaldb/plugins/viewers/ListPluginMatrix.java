@@ -102,7 +102,8 @@ public class ListPluginMatrix extends EasyPluginController {
 		// logged in, reload the matrix
 		if (reload == true || userId != db.getLogin().getUserId().intValue()) {
 			userId = db.getLogin().getUserId().intValue();
-
+			System.out.println("#### " + db.getLogin().getUserId().intValue()
+					+ db.getLogin().getUserName());
 			List<MolgenisRoleGroupLink> group = db.find(
 					MolgenisRoleGroupLink.class, new QueryRule(
 							MolgenisRoleGroupLink.ROLE_, Operator.EQUALS,

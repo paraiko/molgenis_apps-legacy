@@ -695,6 +695,33 @@ public class MatrixViewer extends HtmlWidget {
 
 	@SuppressWarnings("unchecked")
 	public String renderFilterPart() throws MatrixException, DatabaseException {
+
+		// Attempt for new filter layout
+		JQueryDataTable filterTable = new JQueryDataTable(getName()
+				+ "FilterTable");
+
+		List<?> rows = matrix.getRowHeaders();
+		List<?> cols = matrix.getColHeaders();
+
+		// print colHeaders
+
+		if (selectMultiple > 0) {
+			filterTable.addColumn("select"); // for checkbox / radio input
+		}
+
+		for (Object col : cols) {
+			if (col instanceof ObservationElement) {
+				ObservationElement colobs = (ObservationElement) col;
+				filterTable.addColumn(colobs.getName());
+			} else {
+				filterTable.addColumn(col.toString());
+			}
+
+		}
+		// logic for adding removing filters:
+		filterTable.addRow("blaat");
+
+		// existing filter component
 		String divContents = "<br /><img id='showHideSettingsButton' src=\"generated-res/img/plus.png\" "
 				+ "onclick=\"if (document.getElementById('advancedSettings').style.display=='none') {document.getElementById('advancedSettings').style.display='block'; document.getElementById('showHideSettingsButton').src = 'generated-res/img/minus.png';} else {document.getElementById('advancedSettings').style.display='none'; document.getElementById('showHideSettingsButton').src = 'generated-res/img/plus.png';}\" "
 				+ "/>";
@@ -749,7 +776,8 @@ public class MatrixViewer extends HtmlWidget {
 		// divContents += new ActionInput(REMALLCOLHEADERFILTER, "",
 		// "Remove all").render();
 		divContents += "</div></div>";
-		return divContents;
+		// return divContents
+		return filterTable.toHtml() + divContents;
 	}
 
 	private HtmlInput<?> buildFilterInput(Measurement selectedMeasurement) {
