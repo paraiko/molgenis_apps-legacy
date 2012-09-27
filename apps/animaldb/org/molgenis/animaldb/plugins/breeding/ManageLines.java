@@ -147,6 +147,11 @@ public class ManageLines extends PluginModel<Entity> {
 				this.setSuccess("Line successfully removed");
 				// Reset so form is empty again
 				lineId = -1;
+				// FIXME? if a line is removed, Ssould also revoke all the
+				// iswritableBy panel_LineId on existing animals? Or is this a
+				// theoretical problem, since it is probably hard to remove a
+				// line which has animals anyway.
+
 			}
 
 			if (action.equals("addLine")) {
