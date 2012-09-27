@@ -18,6 +18,9 @@ import java.util.Locale;
 import org.molgenis.animaldb.commonservice.CommonService;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
+import org.molgenis.framework.db.Query;
+import org.molgenis.framework.db.QueryRule;
+import org.molgenis.framework.db.QueryRule.Operator;
 import org.molgenis.framework.ui.EasyPluginController;
 import org.molgenis.framework.ui.ScreenController;
 import org.molgenis.framework.ui.ScreenView;
@@ -36,6 +39,7 @@ import org.molgenis.pheno.Individual;
 import org.molgenis.pheno.Location;
 import org.molgenis.pheno.ObservationTarget;
 import org.molgenis.pheno.ObservedValue;
+import org.molgenis.pheno.Panel;
 import org.molgenis.protocol.ProtocolApplication;
 import org.molgenis.util.HandleRequestDelegationException;
 import org.molgenis.util.Tuple;
@@ -466,7 +470,9 @@ public class AddAnimalPlugin extends EasyPluginController {
 						featureNameList.get(11), animalName, null, locName));
 			}
 
-			// Set isWritable by group Caretakers isWritable by user admin
+			// Set security: isWritable by group Caretakers isWritable by user
+			// admin
+			// if line is set: is writabel group by line panel
 			app = appsToAddList.get(11);
 			valuesToAddList.add(ct.createObservedValue(invName, app.getName(),
 					entryDate, null, featureNameList.get(12), animalName,
@@ -474,6 +480,16 @@ public class AddAnimalPlugin extends EasyPluginController {
 			valuesToAddList.add(ct.createObservedValue(invName, app.getName(),
 					entryDate, null, featureNameList.get(12), animalName,
 					"admin", null));
+			if (lineName != null && !lineName.equals("")) {
+				Query<Panel> lineQuery = db.query(Panel.class);
+				lineQuery.addRules(new QueryRule(Panel.NAME, Operator.EQUALS,
+						lineName));
+				int lineId = lineQuery.find().get(0).getId();
+				valuesToAddList.add(ct.createObservedValue(invName,
+						app.getName(), entryDate, null,
+						featureNameList.get(12), animalName, "panel_" + lineId,
+						null));
+			}
 
 			animalCnt++;
 		}

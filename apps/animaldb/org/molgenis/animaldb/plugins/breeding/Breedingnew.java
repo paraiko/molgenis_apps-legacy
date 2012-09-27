@@ -1221,9 +1221,15 @@ public class Breedingnew extends PluginModel<Entity> {
 		valuesToAddList.add(ct.createObservedValueWithProtocolApplication(
 				invName, now, null, "SetIsWritableByMolgenisRole",
 				"IsWritableByMolgenisRole", groupName, "Caretakers", null));
-		valuesToAddList.add(ct.createObservedValueWithProtocolApplication(
-				invName, now, null, "SetIsWritableByMolgenisRole",
-				"IsWritableByMolgenisRole", groupName, "panel_" + line, null));
+
+		Query<Panel> lineQuery = db.query(Panel.class);
+		lineQuery.addRules(new QueryRule(Panel.NAME, Operator.EQUALS, line));
+		int lineId = lineQuery.find().get(0).getId();
+		valuesToAddList
+				.add(ct.createObservedValueWithProtocolApplication(invName,
+						now, null, "SetIsWritableByMolgenisRole",
+						"IsWritableByMolgenisRole", groupName, "panel_"
+								+ lineId, null));
 
 		// Add parent(s)
 		AddParents(db, mama, "SetParentgroupMother", "ParentgroupMother",
