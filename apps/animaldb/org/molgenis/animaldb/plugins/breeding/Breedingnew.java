@@ -477,10 +477,6 @@ public class Breedingnew extends PluginModel<Entity> {
 				valuesToAddList.add(ct.createObservedValue(invName,
 						app.getName(), eventDate, null, "Certain", parentName,
 						valueString, null));
-				// add security measurements
-				valuesToAddList.add(ct.createObservedValue(invName,
-						app.getName(), eventDate, null, "Certain", parentName,
-						valueString, null));
 
 			} else {
 
@@ -1216,8 +1212,8 @@ public class Breedingnew extends PluginModel<Entity> {
 		valuesToAddList.add(ct.createObservedValueWithProtocolApplication(
 				invName, now, null, "SetTypeOfGroup", "TypeOfGroup", groupName,
 				"Parentgroup", null));
-		valuesToAddList.add(ct.createObservedValueWithProtocolApplication(invName, now,
-				null, "SetLine", "Line", groupName, null, line));
+		valuesToAddList.add(ct.createObservedValueWithProtocolApplication(
+				invName, now, null, "SetLine", "Line", groupName, null, line));
 		// add security measurements
 		valuesToAddList.add(ct.createObservedValueWithProtocolApplication(
 				invName, now, null, "SetIsWritableByMolgenisRole",
