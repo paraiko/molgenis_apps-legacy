@@ -202,9 +202,11 @@ public class PrefillAnimalDB {
 			String name = tuple.getString("name");
 			String unitName = tuple.getString("unit");
 			String targettypeAllowedForRelationClassName = null;
+
 			if (tuple.getString("targetType") != null) {
 				targettypeAllowedForRelationClassName = db.getClassForName(
 						tuple.getString("targetType")).getName();
+
 			}
 			String panelLabelAllowedForRelation = tuple.getString("panelLabel");
 			boolean temporal = false;
@@ -413,6 +415,7 @@ public class PrefillAnimalDB {
 
 	public static final void copyInputStream(InputStream in, OutputStream out)
 			throws IOException {
+
 		byte[] buffer = new byte[1024];
 		int len;
 
