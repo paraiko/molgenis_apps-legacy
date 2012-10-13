@@ -191,10 +191,7 @@ public class PhenotypeViewer extends PluginModel<Entity> implements
 			// If the checkbox is checked
 			if (request.getBool("createNewInvest") != null) {
 				projectName = request.getString("newInvestigation");
-				Investigation inv = new Investigation();
-				inv.setName(projectName);
-				db.add(inv);
-
+				createInvestigation(projectName, db);
 			} else {
 				projectName = request.getString("project");
 
@@ -373,6 +370,30 @@ public class PhenotypeViewer extends PluginModel<Entity> implements
 			tableView.handleRequest(db, request, null);
 			loadingMatrix = "Loading the matrix";
 		}
+	}
+
+	/**
+	 * Create investigation if it doesn't exist in the database
+	 * 
+	 * @param investigationName
+	 * @param db
+	 * @throws DatabaseException
+	 */
+	private void createInvestigation(String investigationName, Database db)
+			throws DatabaseException {
+		if (investigationName == null || investigationName.isEmpty())
+			return;
+
+		QueryRule queryRule = new QueryRule(Investigation.NAME,
+				Operator.EQUALS, investigationName);
+		List<Investigation> investigationList = db.find(Investigation.class,
+				queryRule);
+		if (investigationList == null || investigationList.isEmpty()) {
+			Investigation inv = new Investigation();
+			inv.setName(investigationName);
+			db.add(inv);
+		}
+
 	}
 
 	private void importUploadFile(Database db, Tuple request)
@@ -642,18 +663,19 @@ public class PhenotypeViewer extends PluginModel<Entity> implements
 			db.add(listOfPA);
 			db.add(listOfValues);
 
-			// Add the features to the catalogue node
-			for (Protocol p : db.find(Protocol.class, new QueryRule(
-					Protocol.NAME, Operator.IN, new ArrayList<String>(
-							featureToProtocolTable.keySet())))) {
-				List<Integer> oldFeatures = p.getFeatures_Id();
-				for (Measurement m : listOfFeatures) {
-					oldFeatures.add(m.getId());
+			if (featureToProtocolTable.size() > 0) {
+				// Add the features to the catalogue node
+				for (Protocol p : db.find(Protocol.class, new QueryRule(
+						Protocol.NAME, Operator.IN, new ArrayList<String>(
+								featureToProtocolTable.keySet())))) {
+					List<Integer> oldFeatures = p.getFeatures_Id();
+					for (Measurement m : listOfFeatures) {
+						oldFeatures.add(m.getId());
+					}
+					p.setFeatures_Id(oldFeatures);
+					db.update(p);
 				}
-				p.setFeatures_Id(oldFeatures);
-				db.update(p);
 			}
-
 			db.commitTx();
 
 			importMessage = "success";
@@ -713,7 +735,7 @@ public class PhenotypeViewer extends PluginModel<Entity> implements
 	public JQGridView tableChecker(Database db, ProtocolTable table) {
 		tableView = new JQGridView("test", this, table);
 		String selectedInv = "";
-		String selectInvestigationHTML = "<select id=\"selectInvestigation\" class=\"ui-pg-selbox ui-widget-content ui-corner-all\" onChange=\"updateInvestigation()\">";
+		String selectInvestigationHTML = "<select id=\"selectInvestigation\" class=\"ui-widget-content ui-corner-all\" onChange=\"updateInvestigation()\">";
 
 		for (String inv : projects) {
 			if (inv.equals(investigationName)) {
