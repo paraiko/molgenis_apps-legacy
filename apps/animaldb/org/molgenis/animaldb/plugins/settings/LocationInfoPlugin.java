@@ -113,6 +113,7 @@ public class LocationInfoPlugin extends PluginModel<Entity>
 			// ct.getOwnUserInvestigationNames(this.getLogin().getUserName()).get(0);
 			String invName = "System"; // TODO remove old investigation code
 										// above
+
 			action = request.getString("__action");
 
 			if (action.equals("Add"))

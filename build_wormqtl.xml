@@ -1,4 +1,4 @@
-<project>
+<project name="wormqtl">
 	<!-- this name is used to name the war file -->
 	<property name="app_name" value="wormqtl" />
 
@@ -105,6 +105,9 @@
 		
 		<!-- Copy walkthrough document to downloadable location -->
 		<copy file="apps/wormqtl/org/molgenis/wormqtl/help/walkthrough.docx" tofile="WebContent/walkthrough.docx" overwrite="true"/>
+		
+		<!-- block webspiders -->
+		<antcall target="add_robotstxt" />
 	</target>
 	
 	<!-- Custom run with more memory -->

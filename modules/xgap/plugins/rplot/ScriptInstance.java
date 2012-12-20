@@ -11,7 +11,7 @@ public class ScriptInstance
 	public ScriptInstance(Object[] plotThis, File tmpImg, PlotParameters params) throws RScriptException
 	{
 		RScript script = new RScript();
-		RScript.R_COMMAND = "R CMD BATCH --vanilla --slave";
+		script.setR_COMMAND("R CMD BATCH --vanilla --slave");
 		script.append("imagefile <- \"" + tmpImg.getAbsolutePath().replace("\\", "/") + "\";");
 
 		script.append("dataVector <- NULL;");
@@ -45,7 +45,7 @@ public class ScriptInstance
 
 	private boolean checkIfObjectIsDecimal(Object[] values)
 	{
-		//boolean doubleCastSucces = false;
+		// boolean doubleCastSucces = false;
 		for (Object o : values)
 		{
 			if (o != null)
@@ -53,7 +53,7 @@ public class ScriptInstance
 				try
 				{
 					Double.parseDouble(o.toString());
-				//	return true;
+					// return true;
 				}
 				catch (NumberFormatException e)
 				{

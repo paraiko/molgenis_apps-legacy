@@ -39,7 +39,8 @@ import org.molgenis.protocol.ProtocolApplication;
 import org.molgenis.util.CsvFileReader;
 import org.molgenis.util.Tuple;
 
-public class PrefillAnimalDB {
+public class PrefillAnimalDB
+{
 	private Database db;
 	private CommonService ct;
 	private Logger logger;
@@ -60,7 +61,8 @@ public class PrefillAnimalDB {
 	private Map<String, String> appMap = new HashMap<String, String>();
 	private Map<String, Measurement> measMap = new HashMap<String, Measurement>();
 
-	public PrefillAnimalDB(Database db, Login login) throws Exception {
+	public PrefillAnimalDB(Database db, Login login) throws Exception
+	{
 		this.db = db;
 
 		ct = CommonService.getInstance();
@@ -69,7 +71,8 @@ public class PrefillAnimalDB {
 		logger = Logger.getLogger("PrefillAnimalDB");
 
 		// If needed, make investigation
-		if (ct.getInvestigationId(invName) == -1) {
+		if (ct.getInvestigationId(invName) == -1)
+		{
 			Investigation newInv = new Investigation();
 			newInv.setName(invName);
 			newInv.setOwns_Name("admin");
@@ -79,19 +82,19 @@ public class PrefillAnimalDB {
 
 	}
 
-	public void prefillFromZip(String filename) throws Exception {
+	public void prefillFromZip(String filename) throws Exception
+	{
 		// Path to store files from zip
 		File tmpDir = new File(System.getProperty("java.io.tmpdir"));
 		String path = tmpDir.getAbsolutePath() + File.separatorChar;
 		// Extract zip
 		ZipFile zipFile = new ZipFile(filename);
 		Enumeration<?> entries = zipFile.entries();
-		while (entries.hasMoreElements()) {
+		while (entries.hasMoreElements())
+		{
 			ZipEntry entry = (ZipEntry) entries.nextElement();
-			copyInputStream(
-					zipFile.getInputStream(entry),
-					new BufferedOutputStream(new FileOutputStream(path
-							+ entry.getName())));
+			copyInputStream(zipFile.getInputStream(entry),
+					new BufferedOutputStream(new FileOutputStream(path + entry.getName())));
 		}
 		// Run converter steps
 		// populateInvestigation(path + "investigation.csv");
@@ -118,7 +121,8 @@ public class PrefillAnimalDB {
 		writeToDb();
 	}
 
-	public void writeToDb() throws Exception {
+	public void writeToDb() throws Exception
+	{
 
 		db.add(ontologiesToAddList);
 		logger.debug("Ontologies successfully added");
@@ -129,7 +133,8 @@ public class PrefillAnimalDB {
 		// db.add(investigationsToAddList);
 		// logger.debug("Investigations succesfully added");
 		List<Measurement> measList = new ArrayList<Measurement>();
-		for (Measurement meas : measMap.values()) {
+		for (Measurement meas : measMap.values())
+		{
 			measList.add(meas);
 		}
 		db.add(measList);
@@ -145,10 +150,12 @@ public class PrefillAnimalDB {
 		ct.makeObservationTargetNameMap(userName, true);
 	}
 
-	public void populatePrefixes(String filename) throws Exception {
+	public void populatePrefixes(String filename) throws Exception
+	{
 		File file = new File(filename);
 		CsvFileReader reader = new CsvFileReader(file);
-		for (Tuple tuple : reader) {
+		for (Tuple tuple : reader)
+		{
 			NamePrefix np = new NamePrefix();
 			np.setTargetType(tuple.getString("targetType"));
 			np.setPrefix(tuple.getString("prefix"));
@@ -158,10 +165,12 @@ public class PrefillAnimalDB {
 		}
 	}
 
-	public void populateNews(String filename) throws Exception {
+	public void populateNews(String filename) throws Exception
+	{
 		File file = new File(filename);
 		CsvFileReader reader = new CsvFileReader(file);
-		for (Tuple tuple : reader) {
+		for (Tuple tuple : reader)
+		{
 			MolgenisNews mn = new MolgenisNews();
 			mn.setAuthor("Administrator");
 			mn.setDate(new Date());
@@ -173,20 +182,24 @@ public class PrefillAnimalDB {
 		}
 	}
 
-	public void populateOntology(String filename) throws Exception {
+	public void populateOntology(String filename) throws Exception
+	{
 		File file = new File(filename);
 		CsvFileReader reader = new CsvFileReader(file);
-		for (Tuple tuple : reader) {
+		for (Tuple tuple : reader)
+		{
 			Ontology newOnt = new Ontology();
 			newOnt.setName(tuple.getString("name"));
 			ontologiesToAddList.add(newOnt);
 		}
 	}
 
-	public void populateOntologyTerm(String filename) throws Exception {
+	public void populateOntologyTerm(String filename) throws Exception
+	{
 		File file = new File(filename);
 		CsvFileReader reader = new CsvFileReader(file);
-		for (Tuple tuple : reader) {
+		for (Tuple tuple : reader)
+		{
 			OntologyTerm newOntTerm = new OntologyTerm();
 			newOntTerm.setName(tuple.getString("termName"));
 			newOntTerm.setDefinition(tuple.getString("termDefinition"));
@@ -195,42 +208,44 @@ public class PrefillAnimalDB {
 		}
 	}
 
-	public void populateMeasurement(String filename) throws Exception {
+	public void populateMeasurement(String filename) throws Exception
+	{
 		File file = new File(filename);
 		CsvFileReader reader = new CsvFileReader(file);
-		for (Tuple tuple : reader) {
+		for (Tuple tuple : reader)
+		{
 			String name = tuple.getString("name");
 			String unitName = tuple.getString("unit");
 			String targettypeAllowedForRelationClassName = null;
 
-			if (tuple.getString("targetType") != null) {
-				targettypeAllowedForRelationClassName = db.getClassForName(
-						tuple.getString("targetType")).getName();
+			if (tuple.getString("targetType") != null)
+			{
+				targettypeAllowedForRelationClassName = db.getClassForName(tuple.getString("targetType")).getName();
 
 			}
 			String panelLabelAllowedForRelation = tuple.getString("panelLabel");
 			boolean temporal = false;
-			if (tuple.getString("temporal").equals("true")) {
+			if (tuple.getString("temporal").equals("true"))
+			{
 				temporal = true;
 			}
 			String dataType = tuple.getString("dataType");
 			String description = tuple.getString("description");
-			Measurement newMeas = ct.createMeasurement(invName, name, unitName,
-					targettypeAllowedForRelationClassName,
-					panelLabelAllowedForRelation, temporal, dataType,
-					description, userName);
+			Measurement newMeas = ct.createMeasurement(invName, name, unitName, targettypeAllowedForRelationClassName,
+					panelLabelAllowedForRelation, temporal, dataType, description, userName);
 			measMap.put(name, newMeas);
 		}
 	}
 
-	public void populateCategory(String filename) throws Exception {
+	public void populateCategory(String filename) throws Exception
+	{
 		File file = new File(filename);
 		CsvFileReader reader = new CsvFileReader(file);
-		for (Tuple tuple : reader) {
+		for (Tuple tuple : reader)
+		{
 			String code = tuple.getString("code");
 			String measName = tuple.getString("measurement");
-			Category newCat = ct.createCategory(code,
-					tuple.getString("description"), measName);
+			Category newCat = ct.createCategory(code, tuple.getString("description"), measName);
 			newCat.setInvestigation_Name(invName);
 			categoriesToAddList.add(newCat);
 			Measurement meas = measMap.get(measName);
@@ -256,89 +271,85 @@ public class PrefillAnimalDB {
 	 * investigationsToAddList.add(inv); } System.out.println(); }
 	 */
 
-	public void populateProtocol(String filename) throws Exception {
+	public void populateProtocol(String filename) throws Exception
+	{
 		File file = new File(filename);
 		CsvFileReader reader = new CsvFileReader(file);
-		for (Tuple tuple : reader) {
+		for (Tuple tuple : reader)
+		{
 			@SuppressWarnings("unchecked")
-			List<String> measurementNameList = (List<String>) tuple.getList(
-					"measurements", ",");
-			protocolsToAddList.add(ct.createProtocol(invName,
-					tuple.getString("name"), tuple.getString("description"),
+			List<String> measurementNameList = (List<String>) tuple.getList("measurements", ',');
+			protocolsToAddList.add(ct.createProtocol(invName, tuple.getString("name"), tuple.getString("description"),
 					measurementNameList));
 		}
 		System.out.println();
 	}
 
-	public void populateSex(String filename) throws Exception {
+	public void populateSex(String filename) throws Exception
+	{
 		File file = new File(filename);
 		CsvFileReader reader = new CsvFileReader(file);
-		for (Tuple tuple : reader) {
+		for (Tuple tuple : reader)
+		{
 			String sexName = tuple.getString("name");
 			panelsToAddList.add(ct.createPanel(invName, sexName, userName));
-			valuesToAddList.add(ct.createObservedValue(invName,
-					appMap.get("SetTypeOfGroup"), new Date(), null,
+			valuesToAddList.add(ct.createObservedValue(invName, appMap.get("SetTypeOfGroup"), new Date(), null,
 					"TypeOfGroup", sexName, "Sex", null));
 		}
 	}
 
-	public void populateSpecies(String filename) throws Exception {
+	public void populateSpecies(String filename) throws Exception
+	{
 		File file = new File(filename);
 		CsvFileReader reader = new CsvFileReader(file);
-		for (Tuple tuple : reader) {
+		for (Tuple tuple : reader)
+		{
 			String specName = tuple.getString("name");
 			panelsToAddList.add(ct.createPanel(invName, specName, userName));
-			valuesToAddList.add(ct.createObservedValue(invName,
-					appMap.get("SetTypeOfGroup"), new Date(), null,
+			valuesToAddList.add(ct.createObservedValue(invName, appMap.get("SetTypeOfGroup"), new Date(), null,
 					"TypeOfGroup", specName, "Species", null));
-			valuesToAddList
-					.add(ct.createObservedValue(invName,
-							appMap.get("SetVWASpecies"), new Date(), null,
-							"VWASpecies", specName,
-							tuple.getString("VwaSpecies"), null));
-			valuesToAddList.add(ct.createObservedValue(invName,
-					appMap.get("SetLatinSpecies"), new Date(), null,
-					"LatinSpecies", specName, tuple.getString("LatinSpecies"),
-					null));
-			valuesToAddList.add(ct.createObservedValue(invName,
-					appMap.get("SetDutchSpecies"), new Date(), null,
-					"DutchSpecies", specName, tuple.getString("DutchSpecies"),
-					null));
+			valuesToAddList.add(ct.createObservedValue(invName, appMap.get("SetVWASpecies"), new Date(), null,
+					"VWASpecies", specName, tuple.getString("VwaSpecies"), null));
+			valuesToAddList.add(ct.createObservedValue(invName, appMap.get("SetLatinSpecies"), new Date(), null,
+					"LatinSpecies", specName, tuple.getString("LatinSpecies"), null));
+			valuesToAddList.add(ct.createObservedValue(invName, appMap.get("SetDutchSpecies"), new Date(), null,
+					"DutchSpecies", specName, tuple.getString("DutchSpecies"), null));
 		}
 	}
 
-	public void populateBackground(String filename) throws Exception {
+	public void populateBackground(String filename) throws Exception
+	{
 		File file = new File(filename);
 		CsvFileReader reader = new CsvFileReader(file);
-		for (Tuple tuple : reader) {
+		for (Tuple tuple : reader)
+		{
 			String bkgName = tuple.getString("name");
 			String speciesName = tuple.getString("species");
 			panelsToAddList.add(ct.createPanel(invName, bkgName, userName));
-			valuesToAddList.add(ct.createObservedValue(invName,
-					appMap.get("SetTypeOfGroup"), new Date(), null,
+			valuesToAddList.add(ct.createObservedValue(invName, appMap.get("SetTypeOfGroup"), new Date(), null,
 					"TypeOfGroup", bkgName, "Background", null));
-			valuesToAddList.add(ct.createObservedValue(invName,
-					appMap.get("SetSpecies"), new Date(), null, "Species",
+			valuesToAddList.add(ct.createObservedValue(invName, appMap.get("SetSpecies"), new Date(), null, "Species",
 					bkgName, null, speciesName));
 		}
 	}
 
-	public void populateSource(String filename) throws Exception {
+	public void populateSource(String filename) throws Exception
+	{
 		File file = new File(filename);
 		CsvFileReader reader = new CsvFileReader(file);
-		for (Tuple tuple : reader) {
+		for (Tuple tuple : reader)
+		{
 			String sourceName = tuple.getString("name");
 			panelsToAddList.add(ct.createPanel(invName, sourceName, userName));
-			valuesToAddList.add(ct.createObservedValue(invName,
-					appMap.get("SetTypeOfGroup"), new Date(), null,
+			valuesToAddList.add(ct.createObservedValue(invName, appMap.get("SetTypeOfGroup"), new Date(), null,
 					"TypeOfGroup", sourceName, "Source", null));
-			valuesToAddList.add(ct.createObservedValue(invName,
-					appMap.get("SetSourceType"), new Date(), null,
+			valuesToAddList.add(ct.createObservedValue(invName, appMap.get("SetSourceType"), new Date(), null,
 					"SourceType", sourceName, tuple.getString("type"), null));
 		}
 	}
 
-	public void populateProtocolApplication() throws Exception {
+	public void populateProtocolApplication() throws Exception
+	{
 		makeProtocolApplication("SetTypeOfGroup");
 		makeProtocolApplication("SetVWASpecies");
 		makeProtocolApplication("SetLatinSpecies");
@@ -347,23 +358,25 @@ public class PrefillAnimalDB {
 		makeProtocolApplication("SetSourceType");
 	}
 
-	public void makeProtocolApplication(String protocolName) throws Exception {
+	public void makeProtocolApplication(String protocolName) throws Exception
+	{
 		makeProtocolApplication(protocolName, protocolName);
 	}
 
-	public void makeProtocolApplication(String protocolName,
-			String protocolLabel) throws ParseException, DatabaseException,
-			IOException {
-		ProtocolApplication app = ct.createProtocolApplication(invName,
-				protocolName);
+	public void makeProtocolApplication(String protocolName, String protocolLabel) throws ParseException,
+			DatabaseException, IOException
+	{
+		ProtocolApplication app = ct.createProtocolApplication(invName, protocolName);
 		protocolAppsToAddList.add(app);
 		appMap.put(protocolLabel, app.getName());
 	}
 
-	public void populateMolgenisUsers(String filename) throws Exception {
+	public void populateMolgenisUsers(String filename) throws Exception
+	{
 		File file = new File(filename);
 		CsvFileReader reader = new CsvFileReader(file);
-		for (Tuple tuple : reader) {
+		for (Tuple tuple : reader)
+		{
 			MolgenisUser mu = new MolgenisUser();
 			mu.setName(tuple.getString("name"));
 			mu.setFirstName(tuple.getString("Firstname"));
@@ -376,10 +389,12 @@ public class PrefillAnimalDB {
 		}
 	}
 
-	public void populateMolgenisGroups(String filename) throws Exception {
+	public void populateMolgenisGroups(String filename) throws Exception
+	{
 		File file = new File(filename);
 		CsvFileReader reader = new CsvFileReader(file);
-		for (Tuple tuple : reader) {
+		for (Tuple tuple : reader)
+		{
 			MolgenisGroup mg = new MolgenisGroup();
 			mg.setName(tuple.getString("name"));
 			db.add(mg); // this one goes directly into the db, not through a
@@ -387,11 +402,12 @@ public class PrefillAnimalDB {
 		}
 	}
 
-	public void populateMolgenisRoleGroupLinks(String filename)
-			throws Exception {
+	public void populateMolgenisRoleGroupLinks(String filename) throws Exception
+	{
 		File file = new File(filename);
 		CsvFileReader reader = new CsvFileReader(file);
-		for (Tuple tuple : reader) {
+		for (Tuple tuple : reader)
+		{
 			MolgenisRoleGroupLink mrgl = new MolgenisRoleGroupLink();
 			mrgl.setGroup_Name(tuple.getString("group__name"));
 			mrgl.setRole_Name(tuple.getString("role__name"));
@@ -400,10 +416,12 @@ public class PrefillAnimalDB {
 		}
 	}
 
-	public void populateMolgenisPermissions(String filename) throws Exception {
+	public void populateMolgenisPermissions(String filename) throws Exception
+	{
 		File file = new File(filename);
 		CsvFileReader reader = new CsvFileReader(file);
-		for (Tuple tuple : reader) {
+		for (Tuple tuple : reader)
+		{
 			MolgenisPermission mp = new MolgenisPermission();
 			mp.setRole_Name(tuple.getString("role__name"));
 			mp.setEntity_ClassName(tuple.getString("entity_className"));
@@ -413,8 +431,8 @@ public class PrefillAnimalDB {
 		}
 	}
 
-	public static final void copyInputStream(InputStream in, OutputStream out)
-			throws IOException {
+	public static final void copyInputStream(InputStream in, OutputStream out) throws IOException
+	{
 
 		byte[] buffer = new byte[1024];
 		int len;

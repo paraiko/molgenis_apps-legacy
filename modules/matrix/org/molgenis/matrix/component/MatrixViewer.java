@@ -76,6 +76,8 @@ public class MatrixViewer extends HtmlWidget
 {
 	private static final int BATCHSIZE = 100;
 
+	private static final String ADDREMCOLS = null;
+
 	ScreenController<?> callingScreenController;
 
 	SliceableMatrix<?, ?, ?> matrix;
@@ -90,6 +92,7 @@ public class MatrixViewer extends HtmlWidget
 	private boolean showDownloadOptions = false;
 	private boolean showNameFilter = true;
 	private boolean isEditable;
+	private boolean showTargetTooltip = false;
 	private String APPLICATION_STRING = "GENERIC";
 
 	private String downloadLink = null;
@@ -334,7 +337,7 @@ public class MatrixViewer extends HtmlWidget
 			result += "</td></tr><tr><td>";
 			result += renderTable();
 			result += "</td></tr><tr><td>";
-			result += renderFilterPart();
+			// result += renderFilterPart();
 			result += "</td></tr></table>";
 			result += "</div>";
 
@@ -348,7 +351,7 @@ public class MatrixViewer extends HtmlWidget
 		}
 	}
 
-	public String renderHeader() throws MatrixException
+	public String renderHeader() throws MatrixException, DatabaseException
 	{
 		String divContents = "";
 		// reload
@@ -357,10 +360,10 @@ public class MatrixViewer extends HtmlWidget
 		divContents += "<div style=\"float:left; vertical-align:middle\">" + reload.render() + "</div>";
 		// move vertical (row paging)
 		ActionInput moveUpEnd = new ActionInput(MOVEUPEND, "", "");
-		moveUpEnd.setIcon("generated-res/img/first.png");
+		moveUpEnd.setIcon("generated-res/img/first_32.png");
 		divContents += "<div style=\"padding-left:10px; float:left; vertical-align:middle\">" + moveUpEnd.render();
 		ActionInput moveUp = new ActionInput(MOVEUP, "", "");
-		moveUp.setIcon("generated-res/img/prev.png");
+		moveUp.setIcon("generated-res/img/prev_32.png");
 		divContents += moveUp.render();
 		int rowOffset = this.matrix.getRowOffset();
 		int rowLimit = this.matrix.getRowLimit();
@@ -377,10 +380,10 @@ public class MatrixViewer extends HtmlWidget
 			divContents += new ActionInput(CHANGEROWLIMIT, "", "Change").render();
 		}
 		ActionInput moveDown = new ActionInput(MOVEDOWN, "", "");
-		moveDown.setIcon("generated-res/img/next.png");
+		moveDown.setIcon("generated-res/img/next_32.png");
 		divContents += moveDown.render();
 		ActionInput moveDownEnd = new ActionInput(MOVEDOWNEND, "", "");
-		moveDownEnd.setIcon("generated-res/img/last.png");
+		moveDownEnd.setIcon("generated-res/img/last_32.png");
 		divContents += moveDownEnd.render() + "</div>";
 		// download options
 		if (showDownloadOptions)
@@ -433,6 +436,44 @@ public class MatrixViewer extends HtmlWidget
 					+ "</div>";
 
 		}
+
+		// add remove columns from matrix.
+
+		// addRemCols.setIcon("generated-res/img/plus.png");
+
+		divContents += "<img id='showHideAddRemColButton' title=\"Add or Remove a datacolumn\" style=\"padding:2px;\" src=\"res/img/addremcol_32.png\" "
+				+ "onclick=\"if (document.getElementById('addRemCol').style.display=='none') {document.getElementById('addRemCol').style.display='block';} else {document.getElementById('addRemCol').style.display='none';} \" "
+				+ "/>";
+		divContents += "<img id='showHideFilterButton' title=\"Add or Remove a data filter \" style=\"padding:2px;\" src=\"res/img/filter_32.png\" "
+				+ "onclick=\"if (document.getElementById('addFilter').style.display=='none') {document.getElementById('addFilter').style.display='block';} else {document.getElementById('addFilter').style.display='none';} \" "
+				+ "/>";
+		// the header filter div (add remo cols)
+		divContents += "<div id='addRemCol' style='display:none;float:left;background-color: #D3D6FF;padding:5px;margin:5px;border-radius: 5px;'><br />";
+		List<? extends Object> colHeaders = matrix.getColHeaders();
+		@SuppressWarnings("rawtypes")
+		List selectedMeasurements = new ArrayList(colHeaders);
+		MrefInput measurementChooser = new MrefInput(MEASUREMENTCHOOSER, "Add/remove columns:", selectedMeasurements,
+				false, false, "Choose one or more columns (i.e. measurements) to be displayed in the matrix viewer",
+				Measurement.class);
+		// disable display of button for adding new measurements from here
+		measurementChooser.setIncludeAddButton(false);
+		divContents += new Newline().render();
+		divContents += "<div style=\"clear: both; vertical-align:middle\"> <strong>Add/remove columns: </strong><br />";
+		divContents += measurementChooser.render();
+		divContents += new ActionInput(UPDATECOLHEADERFILTER, "", "Update").render();
+		// if (this.APPLICATION_STRING != "ANIMALDB")
+		// {
+		// divContents += new ActionInput(ADDALLCOLHEADERFILTER, "",
+		// "Add all").render();
+		// }
+		// divContents += new ActionInput(REMALLCOLHEADERFILTER, "",
+		// "Remove all").render();
+		divContents += "</div></div>";
+
+		// the filter div
+		divContents += "<div id='addFilter' style='display:none;clear:both;background-color: #D3D6FF;padding:5px;margin:5px;border-radius: 5px;'>";
+		divContents += renderFilterPart();
+		divContents += "</div></div>";
 
 		return divContents;
 	}
@@ -572,57 +613,61 @@ public class MatrixViewer extends HtmlWidget
 								if (val instanceof ObservedValue && valueToShow == null)
 								{
 									String relName = ((ObservedValue) val).getRelation_Name();
+
 									// Make a nice info box about the target in
 									// the cell:
-									String infoBoxContents = "<strong>" + relName + "</strong><hr>";
-									infoBoxContents += "<p>Values set on this target:</p>";
-									infoBoxContents += "<ul>";
-									try
+									if (this.showTargetTooltip)
 									{
-										List<ObservedValue> valList = db.query(ObservedValue.class)
-												.eq(ObservedValue.TARGET_NAME, relName)
-												.sortASC(ObservedValue.FEATURE_NAME).find();
-										for (ObservedValue infoVal : valList)
+										String infoBoxContents = "<strong>" + relName + "</strong><hr>";
+										infoBoxContents += "<p>Values set on this target:</p>";
+										infoBoxContents += "<ul>";
+										try
 										{
-											String infoValue = infoVal.getValue();
-											if (infoValue == null)
+											List<ObservedValue> valList = db.query(ObservedValue.class)
+													.eq(ObservedValue.TARGET_NAME, relName)
+													.sortASC(ObservedValue.FEATURE_NAME).find();
+											for (ObservedValue infoVal : valList)
 											{
-												infoValue = infoVal.getRelation_Name();
+												String infoValue = infoVal.getValue();
+												if (infoValue == null)
+												{
+													infoValue = infoVal.getRelation_Name();
+												}
+												infoBoxContents += "<li>"
+														+ (infoVal.getFeature_Name() + ": " + infoValue + "</li>");
 											}
-											infoBoxContents += "<li>"
-													+ (infoVal.getFeature_Name() + ": " + infoValue + "</li>");
+											infoBoxContents += "</ul>";
+											// If you want info about values in
+											// which the target is referred to:
+											// infoBoxContents +=
+											// "<p>Values in which this target is referred to:</p>";
+											// infoBoxContents += "<ul>";
+											// valList =
+											// db.query(ObservedValue.class).
+											// eq(ObservedValue.RELATION_NAME,
+											// relName).
+											// sortASC(ObservedValue.FEATURE_NAME).
+											// find();
+											// for (ObservedValue infoVal :
+											// valList)
+											// {
+											// infoBoxContents +="<li>" +
+											// (infoVal.getFeature_Name() + ": "
+											// +
+											// infoVal.getTarget_Name() +
+											// "</li>");
+											// }
+											// infoBoxContents +="</ul>";
 										}
-										infoBoxContents += "</ul>";
-										// If you want info about values in
-										// which the target is referred to:
-										// infoBoxContents +=
-										// "<p>Values in which this target is referred to:</p>";
-										// infoBoxContents += "<ul>";
-										// valList =
-										// db.query(ObservedValue.class).
-										// eq(ObservedValue.RELATION_NAME,
-										// relName).
-										// sortASC(ObservedValue.FEATURE_NAME).
-										// find();
-										// for (ObservedValue infoVal : valList)
-										// {
-										// infoBoxContents +="<li>" +
-										// (infoVal.getFeature_Name() + ": " +
-										// infoVal.getTarget_Name() + "</li>");
-										// }
-										// infoBoxContents +="</ul>";
+										catch (DatabaseException e)
+										{
+											// List will remain empty
+										}
 									}
-									catch (DatabaseException e)
+									else
 									{
-										// List will remain empty
+										valueToShow = relName;
 									}
-									// valueToShow =
-									// "<a href=\"\" onclick=\"alert('" +
-									// infoBoxContents + "');\">" +
-									// relName + "</a>" +
-									valueToShow = relName + "<a href=\"#\" onMouseOver=\"toolTip('" + infoBoxContents
-											+ "')\" onMouseOut=\"toolTip()\">...</a>";
-
 								}
 
 								// If timing should be shown:
@@ -709,36 +754,14 @@ public class MatrixViewer extends HtmlWidget
 	@SuppressWarnings("unchecked")
 	public String renderFilterPart() throws MatrixException, DatabaseException
 	{
+		String divContents = new Paragraph("filterRules", "<strong>Active filters</strong>:" + generateFilterRules())
+				.render();
 
-		/*
-		 * // Attempt for new filter layout JQueryDataTable filterTable = new
-		 * JQueryDataTable(getName() + "FilterTable");
-		 * 
-		 * List<?> rows = matrix.getRowHeaders(); List<?> cols =
-		 * matrix.getColHeaders();
-		 * 
-		 * // print colHeaders
-		 * 
-		 * if (selectMultiple > 0) { filterTable.addColumn("select"); // for
-		 * checkbox / radio input }
-		 * 
-		 * for (Object col : cols) { if (col instanceof ObservationElement) {
-		 * ObservationElement colobs = (ObservationElement) col;
-		 * filterTable.addColumn(colobs.getName()); } else {
-		 * filterTable.addColumn(col.toString()); }
-		 * 
-		 * } // logic for adding removing filters: filterTable.addRow("blaat");
-		 */
-
-		// existing filter component
-		String divContents = "<br /><img id='showHideSettingsButton' src=\"generated-res/img/plus.png\" "
-				+ "onclick=\"if (document.getElementById('advancedSettings').style.display=='none') {document.getElementById('advancedSettings').style.display='block'; document.getElementById('showHideSettingsButton').src = 'generated-res/img/minus.png';} else {document.getElementById('advancedSettings').style.display='none'; document.getElementById('showHideSettingsButton').src = 'generated-res/img/plus.png';}\" "
-				+ "/>";
-		divContents += "<div id='advancedSettings' style='display:none'>";
-		divContents += new Paragraph("filterRules", "Applied filters:" + generateFilterRules()).render();
 		// add column filter
+
 		List<? extends Object> colHeaders = matrix.getColHeaders();
-		divContents += "<div style=\"clear:both\">Add filter:";
+		// divContents +=
+		// "<hr><div style=\"clear:both\"><strong>Add new filter: </strong><br />";
 		divContents += buildFilterChoices(colHeaders).render();
 		divContents += buildFilterOperator(d_selectedMeasurement).render(); // TODO:
 																			// chosen()
@@ -756,29 +779,8 @@ public class MatrixViewer extends HtmlWidget
 																			// alignment
 																			// under
 																			// FF+IE
-		divContents += new ActionInput(FILTERCOL, "", "Apply").render() + "</div>";
-		// column header filter
-		@SuppressWarnings("rawtypes")
-		List selectedMeasurements = new ArrayList(colHeaders);
-		MrefInput measurementChooser = new MrefInput(MEASUREMENTCHOOSER, "Add/remove columns:", selectedMeasurements,
-				false, false, "Choose one or more columns (i.e. measurements) to be displayed in the matrix viewer",
-				Measurement.class);
-		// disable display of button for adding new measurements from here
-		measurementChooser.setIncludeAddButton(false);
-		divContents += new Newline().render();
-		divContents += "<div style=\"clear: both; vertical-align:middle\">Add/remove columns:";
-		divContents += measurementChooser.render();
-		divContents += new ActionInput(UPDATECOLHEADERFILTER, "", "Update").render();
-		if (this.APPLICATION_STRING != "ANIMALDB")
-		{
-			divContents += new ActionInput(ADDALLCOLHEADERFILTER, "", "Add all").render();
-		}
+		divContents += new ActionInput(FILTERCOL, "", "Apply").render();
 
-		// divContents += new ActionInput(REMALLCOLHEADERFILTER, "",
-		// "Remove all").render();
-		divContents += "</div></div>";
-		// return divContents
-		// return filterTable.toHtml() + divContents;
 		return divContents;
 	}
 
@@ -819,8 +821,8 @@ public class MatrixViewer extends HtmlWidget
 		// At this moment, selectedMeasurement is always null. Temp. fix:
 		if (selectedMeasurement == null)
 		{
-			operatorInput.addOption(Operator.EQUALS.name(), Operator.EQUALS.name());
 			operatorInput.addOption(Operator.LIKE.name(), Operator.LIKE.name());
+			operatorInput.addOption(Operator.EQUALS.name(), Operator.EQUALS.name());
 			// operatorInput.addOption(Operator.ISNA, Operator.ISNA.name());
 			// TODO: implement! Find a way to filter on ObservedValues that are
 			// NOT present
@@ -1053,7 +1055,7 @@ public class MatrixViewer extends HtmlWidget
 			int maxRow = matrix.getRowCount();
 
 			CsvWriter writer = new CsvFileWriter(file);
-			writer.setSeparator(",");
+			writer.setSeparator(',');
 
 			// batch size = 100
 			matrix.setRowLimit(BATCHSIZE);
@@ -1167,7 +1169,7 @@ public class MatrixViewer extends HtmlWidget
 			throws IOException, MatrixException
 	{
 		CsvWriter writer = new CsvFileWriter(file);
-		writer.setSeparator(",");
+		writer.setSeparator(',');
 
 		// write headers
 		List<String> headers = new ArrayList<String>();

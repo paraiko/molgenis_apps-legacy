@@ -69,8 +69,10 @@ public class AnimalDBHeader extends PluginModel<Entity>
 		{
 			int nrOfUsersInDb = db.count(MolgenisUser.class);
 			if (nrOfUsersInDb == 0)
-			{ // Check if DB is filled by counting the
-				// nr. of users (should always be >= 2)
+
+			{
+				// Check if DB is filled by counting the nr. of users (should
+				// always be >= 2)
 				prefillDb(db);
 			}
 		}

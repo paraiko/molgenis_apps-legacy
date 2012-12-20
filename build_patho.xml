@@ -1,4 +1,4 @@
-<project>
+<project name="patho">
 	<!-- this name is used to name the war file -->
 	<property name="app_name" value="patho" />
 
@@ -14,11 +14,14 @@
 		<pathelement location="modules/file" />
 		<pathelement location="modules/matrix" />
 		<pathelement location="modules/auth" />
+		<pathelement location="modules/news" />
+		<pathelement location="modules/variant" />
 		<pathelement location="modules/datamodel" />
 		<pathelement location="modules/decorators/auth" />
 		<pathelement location="modules/decorators/core" />
 		<pathelement location="modules/decorators/pheno" />
 		<pathelement location="modules/webserver" />
+		<pathelement location="modules/load" />
 	</path>
 
 	<!-- import all tasks from build_common: clean, generate, compile, test, war, standalone-jar -->
