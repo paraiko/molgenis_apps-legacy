@@ -34,7 +34,8 @@ import org.molgenis.pheno.Measurement;
 import org.molgenis.pheno.ObservedValue;
 import org.molgenis.util.Tuple;
 
-public class ListPluginMatrix extends EasyPluginController {
+public class ListPluginMatrix extends EasyPluginController
+{
 	private static final long serialVersionUID = 8804579908239186037L;
 	MatrixViewer targetMatrixViewer = null;
 	static String TARGETMATRIX = "targetmatrix";
@@ -47,13 +48,16 @@ public class ListPluginMatrix extends EasyPluginController {
 	private int userId = -1;
 	private Boolean inEditMode;
 
-	public ListPluginMatrix(String name, ScreenController<?> parent) {
+	public ListPluginMatrix(String name, ScreenController<?> parent)
+	{
 		super(name, parent);
 	}
 
 	@Override
-	public Show handleRequest(Database db, Tuple request, OutputStream out) {
-		if (targetMatrixViewer != null) {
+	public Show handleRequest(Database db, Tuple request, OutputStream out)
+	{
+		if (targetMatrixViewer != null)
+		{
 			targetMatrixViewer.setDatabase(db);
 			targetMatrixViewer.setAPPLICATION_STRING("ANIMALDB");
 		}
@@ -61,38 +65,44 @@ public class ListPluginMatrix extends EasyPluginController {
 		reload = true;
 		action = request.getAction();
 
-		try {
-			if (action != null
-					&& action.startsWith(targetMatrixViewer.getName())) {
+		try
+		{
+			if (action != null && action.startsWith(targetMatrixViewer.getName()))
+			{
 				targetMatrixViewer.handleRequest(db, request);
 				reload = false;
 			}
 
 			if (action.equals(EDIT_BUTTON_ACTION)
-					|| action.equals(targetMatrixViewer.getName()
-							+ EditableJQueryDataTable.MATRIX_EDIT_ACTION)) {
-				if (inEditMode) {
+					|| action.equals(targetMatrixViewer.getName() + EditableJQueryDataTable.MATRIX_EDIT_ACTION))
+			{
+				if (inEditMode)
+				{
 					inEditMode = false;
-				} else {
+				}
+				else
+				{
 					inEditMode = true;
 				}
 				reload = true;
 			}
 
-		} catch (Exception e) {
+		}
+		catch (Exception e)
+		{
 			e.printStackTrace();
 			this.getMessages().add(
-					new ScreenMessage(
-							"Something went wrong while handling request: "
-									+ e.getMessage(), false));
+					new ScreenMessage("Something went wrong while handling request: " + e.getMessage(), false));
 		}
 
 		return Show.SHOW_MAIN;
 	}
 
 	@Override
-	public void reload(Database db) throws DatabaseException {
-		if (inEditMode == null) {
+	public void reload(Database db) throws DatabaseException
+	{
+		if (inEditMode == null)
+		{
 			inEditMode = false;
 		}
 
@@ -100,16 +110,15 @@ public class ListPluginMatrix extends EasyPluginController {
 
 		// If a non-matrix related request was handled or if a new user has
 		// logged in, reload the matrix
-		if (reload == true || userId != db.getLogin().getUserId().intValue()) {
+		if (reload == true || userId != db.getLogin().getUserId().intValue())
+		{
 			userId = db.getLogin().getUserId().intValue();
-			System.out.println("#### " + db.getLogin().getUserId().intValue()
-					+ db.getLogin().getUserName());
-			List<MolgenisRoleGroupLink> group = db.find(
-					MolgenisRoleGroupLink.class, new QueryRule(
-							MolgenisRoleGroupLink.ROLE_, Operator.EQUALS,
-							userId));
+			System.out.println("#### " + db.getLogin().getUserId().intValue() + db.getLogin().getUserName());
+			List<MolgenisRoleGroupLink> group = db.find(MolgenisRoleGroupLink.class, new QueryRule(
+					MolgenisRoleGroupLink.ROLE_, Operator.EQUALS, userId));
 
-			for (MolgenisRoleGroupLink r : group) {
+			for (MolgenisRoleGroupLink r : group)
+			{
 				System.out.println("#### " + r.getGroup_Name());
 			}
 
@@ -117,10 +126,9 @@ public class ListPluginMatrix extends EasyPluginController {
 			div = new DivPanel();
 			targetMatrixViewer = null; // hack to delete status between
 										// sessions......
-			try {
-				List<String> investigationNames = cs
-						.getAllUserInvestigationNames(db.getLogin()
-								.getUserName());
+			try
+			{
+				List<String> investigationNames = cs.getAllUserInvestigationNames(db.getLogin().getUserName());
 				List<String> measurementsToShow = new ArrayList<String>();
 				// Some measurements that we think AnimalDB users like to see
 				// most:
@@ -142,10 +150,8 @@ public class ListPluginMatrix extends EasyPluginController {
 				// measurementsToShow.add("Remark");
 
 				List<MatrixQueryRule> filterRules = new ArrayList<MatrixQueryRule>();
-				filterRules.add(new MatrixQueryRule(
-						MatrixQueryRule.Type.rowHeader,
-						Individual.INVESTIGATION_NAME, Operator.IN,
-						investigationNames));
+				filterRules.add(new MatrixQueryRule(MatrixQueryRule.Type.rowHeader, Individual.INVESTIGATION_NAME,
+						Operator.IN, investigationNames));
 
 				// Query<Protocol> q = db.query(Protocol.class);
 				// QueryRule qr1 = new QueryRule(Measurement.INVESTIGATION,
@@ -157,22 +163,19 @@ public class ListPluginMatrix extends EasyPluginController {
 				// OR System investigation
 				// return q.find();
 
-				filterRules.add(new MatrixQueryRule(
-						MatrixQueryRule.Type.colValueProperty, cs
-								.getMeasurementId("Active"),
-						ObservedValue.VALUE, Operator.EQUALS, "Alive"));
+				filterRules.add(new MatrixQueryRule(MatrixQueryRule.Type.colValueProperty, cs
+						.getMeasurementId("Active"), ObservedValue.VALUE, Operator.EQUALS, "Alive"));
 
-				if (inEditMode) {
+				if (inEditMode)
+				{
 					// restore filters and measurements to show
 					filterRules = targetMatrixViewer.getMatrix().getRules();
-					int oldOffset = targetMatrixViewer.getMatrix()
-							.getRowOffset();
+					int oldOffset = targetMatrixViewer.getMatrix().getRowOffset();
 					int oldLimit = targetMatrixViewer.getMatrix().getRowLimit();
 
 					targetMatrixViewer = new MatrixViewer(this, TARGETMATRIX,
-							new SliceablePhenoMatrix<Individual, Measurement>(
-									Individual.class, Measurement.class), true,
-							0, true, false, filterRules, null, true);
+							new SliceablePhenoMatrix<Individual, Measurement>(Individual.class, Measurement.class),
+							true, 0, true, false, filterRules, null, true);
 
 					// enable animalDB specific traits (sorting filtering etc)
 					targetMatrixViewer.setAPPLICATION_STRING("ANIMALDB");
@@ -181,38 +184,35 @@ public class ListPluginMatrix extends EasyPluginController {
 					targetMatrixViewer.getMatrix().setRowOffset(oldOffset);
 					targetMatrixViewer.getMatrix().setRowLimit(oldLimit);
 
-					String nameIdSave = targetMatrixViewer.getName()
-							+ EditableJQueryDataTable.MATRIX_EDIT_ACTION;
-					ActionInput saveButton = new ActionInput(nameIdSave, "",
-							"Save");
+					String nameIdSave = targetMatrixViewer.getName() + EditableJQueryDataTable.MATRIX_EDIT_ACTION;
+					ActionInput saveButton = new ActionInput(nameIdSave, "", "Save");
 					saveButton.setId(nameIdSave);
 					div.add(saveButton);
 
-					ActionInput editButton = new ActionInput(
-							EDIT_BUTTON_ACTION, "", "Cancel");
+					ActionInput editButton = new ActionInput(EDIT_BUTTON_ACTION, "", "Cancel");
 					editButton.setId(EDIT_BUTTON_ACTION);
 					div.add(editButton);
 
-				} else {
+				}
+				else
+				{
 					int oldOffset = 0;
 					int oldLimit = 10;
-					MatrixQueryRule measurements = new MatrixQueryRule(
-							MatrixQueryRule.Type.colHeader, Measurement.NAME,
-							Operator.IN, measurementsToShow);
+					MatrixQueryRule measurements = new MatrixQueryRule(MatrixQueryRule.Type.colHeader,
+							Measurement.NAME, Operator.IN, measurementsToShow);
 
-					if (targetMatrixViewer != null) {
+					if (targetMatrixViewer != null)
+					{
 						// restore filters and measurements to show
 						filterRules = targetMatrixViewer.getMatrix().getRules();
-						oldOffset = targetMatrixViewer.getMatrix()
-								.getRowOffset();
+						oldOffset = targetMatrixViewer.getMatrix().getRowOffset();
 						oldLimit = targetMatrixViewer.getMatrix().getRowLimit();
 						measurements = null;
 					}
 
 					targetMatrixViewer = new MatrixViewer(this, TARGETMATRIX,
-							new SliceablePhenoMatrix<Individual, Measurement>(
-									Individual.class, Measurement.class), true,
-							0, true, false, filterRules, measurements, false);
+							new SliceablePhenoMatrix<Individual, Measurement>(Individual.class, Measurement.class),
+							true, 0, true, false, filterRules, measurements, false);
 
 					// enable animalDB specific traits (sorting filtering etc)
 					targetMatrixViewer.setAPPLICATION_STRING("ANIMALDB");
@@ -224,9 +224,9 @@ public class ListPluginMatrix extends EasyPluginController {
 					// Temporarily make this function admin only, because it is
 					// to dangerous for normal users in its current form
 					String userName = db.getLogin().getUserName();
-					if (userName.equals("admin")) {
-						ActionInput editButton = new ActionInput(
-								EDIT_BUTTON_ACTION, "", "Edit");
+					if (userName.equals("admin"))
+					{
+						ActionInput editButton = new ActionInput(EDIT_BUTTON_ACTION, "", "Edit");
 						editButton.setId(EDIT_BUTTON_ACTION);
 						div.add(editButton);
 					}
@@ -235,19 +235,22 @@ public class ListPluginMatrix extends EasyPluginController {
 				targetMatrixViewer.setDatabase(db);
 				div.add(targetMatrixViewer);
 				container.add(div);
-			} catch (Exception e) {
+			}
+			catch (Exception e)
+			{
 				e.printStackTrace();
 				this.getMessages().add(
-						new ScreenMessage(
-								"Something went wrong while loading matrix: "
-										+ e.getMessage(), false));
+						new ScreenMessage("Something went wrong while loading matrix: " + e.getMessage(), false));
 			}
-		} else {
+		}
+		else
+		{
 			targetMatrixViewer.setDatabase(db);
 		}
 	}
 
-	public ScreenView getView() {
+	public ScreenView getView()
+	{
 		MolgenisForm view = new MolgenisForm(this);
 		view.add(container);
 		return view;

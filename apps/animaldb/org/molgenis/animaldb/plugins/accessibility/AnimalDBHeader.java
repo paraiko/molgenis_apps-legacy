@@ -32,15 +32,18 @@ import app.FillMetadata;
  * 
  * @author Morris Swertz
  */
-public class AnimalDBHeader extends PluginModel<Entity> {
+public class AnimalDBHeader extends PluginModel<Entity>
+{
 	private String feedback = null;
 	private static final long serialVersionUID = 4701628601897969977L;
 
-	public AnimalDBHeader(String name, ScreenController<?> parent) {
+	public AnimalDBHeader(String name, ScreenController<?> parent)
+	{
 		super(name, parent);
 	}
 
-	public String getCustomHtmlHeaders() {
+	public String getCustomHtmlHeaders()
+	{
 		return "<script src=\"res/jquery-plugins/ctnotify/lib/jquery.ctNotify.js\" language=\"javascript\"></script>\n"
 				+ "<link rel=\"stylesheet\" style=\"text/css\" href=\"res/jquery-plugins/ctnotify/lib/jquery.ctNotify.css\">"
 				+ "<link rel=\"stylesheet\" style=\"text/css\" href=\"res/jquery-plugins/ctnotify/lib/jquery.ctNotify.rounded.css\">"
@@ -48,34 +51,46 @@ public class AnimalDBHeader extends PluginModel<Entity> {
 	}
 
 	@Override
-	public String getViewName() {
+	public String getViewName()
+	{
 		return "org_molgenis_animaldb_plugins_accessibility_AnimalDBHeader";
 	}
 
 	@Override
-	public String getViewTemplate() {
+	public String getViewTemplate()
+	{
 		return "org/molgenis/animaldb/plugins/accessibility/AnimalDBHeader.ftl";
 	}
 
 	@Override
-	public void reload(Database db) {
-		try {
+	public void reload(Database db)
+	{
+		try
+		{
 			int nrOfUsersInDb = db.count(MolgenisUser.class);
-			if (nrOfUsersInDb == 0) { // Check if DB is filled by counting the
-										// nr. of users (should always be >= 2)
+			if (nrOfUsersInDb == 0)
+			{ // Check if DB is filled by counting the
+				// nr. of users (should always be >= 2)
 				prefillDb(db);
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e)
+		{
 			this.setError("Something went wrong while trying to reset and prefill your database: could not count number of MolgenisUsers in DB");
 		}
 	}
 
-	private void prefillDb(Database db) {
-		try {
+	private void prefillDb(Database db)
+	{
+		try
+		{
 			// Empty DB and run generated sql scripts
-			if (db instanceof JpaDatabase) {
+			if (db instanceof JpaDatabase)
+			{
 				JpaUtil.dropAndCreateTables(db, null);
-			} else {
+			}
+			else
+			{
 				new emptyDatabase(db, false);
 			}
 			FillMetadata.fillMetadata(db, false);
@@ -87,9 +102,12 @@ public class AnimalDBHeader extends PluginModel<Entity> {
 			// Plugin instead.
 			// FillAnimalDB myFillAnimalDB = new FillAnimalDB(db);
 			// myFillAnimalDB.populateDB(this.getLogin());
-		} catch (Exception e) {
+		}
+		catch (Exception e)
+		{
 			String message = "Something went wrong while trying to reset and prefill your database";
-			if (e.getMessage() != null) {
+			if (e.getMessage() != null)
+			{
 				message += (": " + e.getMessage());
 			}
 			this.setError(message);
@@ -98,67 +116,76 @@ public class AnimalDBHeader extends PluginModel<Entity> {
 	}
 
 	@Override
-	public void handleRequest(Database db, Tuple request) {
-		try {
-			if ("doLogout".equals(request.getAction())) {
+	public void handleRequest(Database db, Tuple request)
+	{
+		try
+		{
+			if ("doLogout".equals(request.getAction()))
+			{
 				getLogin().logout(db);
 			}
 
-			if ("sendFeedback".equals(request.getAction())) {
-				feedback = "User: " + request.getString("name")
-						+ " (username: " + this.getLogin().getUserName()
-						+ ") sent:\n\n" + request.getString("feedback")
-						+ "\n\nabout: " + request.getString("plugin");
+			if ("sendFeedback".equals(request.getAction()))
+			{
+				feedback = "User: " + request.getString("name") + " (username: " + this.getLogin().getUserName()
+						+ ") sent:\n\n" + request.getString("feedback") + "\n\nabout: " + request.getString("plugin");
 
 				// get admin email
-				MolgenisUser admin = db.query(MolgenisUser.class)
-						.eq(MolgenisUser.NAME, "admin").find().get(0);
-				if (StringUtils.isEmpty(admin.getEmail()))
-					throw new DatabaseException(
-							"Sending feedback failed: the administrator has no email address set. Please contact your administrator about this.");
+				MolgenisUser admin = db.query(MolgenisUser.class).eq(MolgenisUser.NAME, "admin").find().get(0);
+				if (StringUtils.isEmpty(admin.getEmail())) throw new DatabaseException(
+						"Sending feedback failed: the administrator has no email address set. Please contact your administrator about this.");
 
 				EmailService ses = this.getEmailService();
-				ses.email("New feedback on AnimalDB", feedback,
-						admin.getEmail(), true);
+				ses.email("New feedback on AnimalDB", feedback, admin.getEmail(), true);
 
 				this.getMessages().add(new ScreenMessage(feedback, true));
 			}
 
-			if ("resetFeedbackForm".equals(request.getAction())) {
+			if ("resetFeedbackForm".equals(request.getAction()))
+			{
 				feedback = null;
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e)
+		{
 			e.printStackTrace();
 			this.getMessages().add(new ScreenMessage(e.getMessage(), false));
 			// this.setError(e.getMessage());
 		}
 	}
 
-	public String getActivePlugin() {
-		if (this.getParent().getSelected() == null) {
+	public String getActivePlugin()
+	{
+		if (this.getParent().getSelected() == null)
+		{
 			return "";
 		}
 		ScreenModel model = this.getParent().getSelected();
-		while (model.getSelected() != null) {
+		while (model.getSelected() != null)
+		{
 			model = model.getSelected();
 		}
 		return model.getLabel();
 	}
 
-	public String getFullUserName() {
+	public String getFullUserName()
+	{
 
-		if (this.getLogin().isAuthenticated()) {
+		if (this.getLogin().isAuthenticated())
+		{
 			return ((DatabaseLogin) this.getLogin()).getFullUserName();
 		}
 		return null;
 	}
 
-	public String getFeedback() {
+	public String getFeedback()
+	{
 		return feedback;
 	}
 
 	@Override
-	public boolean isVisible() {
+	public boolean isVisible()
+	{
 		return true;
 	}
 
