@@ -2038,6 +2038,9 @@ public class Breedingnew extends PluginModel<Entity>
 		int lineId = lineQuery.find().get(0).getId();
 		valuesToAddList.add(ct.createObservedValueWithProtocolApplication(invName, now, null,
 				"SetIsWritableByMolgenisRole", "IsWritableByMolgenisRole", groupName, "panel_" + lineId, null));
+		// add list to db
+		// FIXME add all values to list and add list at once.
+		db.add(valuesToAddList);
 
 		// Add parent(s)
 		AddParents(db, mama, "SetParentgroupMother", "ParentgroupMother", groupName, eventDate);
@@ -2792,14 +2795,15 @@ public class Breedingnew extends PluginModel<Entity>
 			}
 
 			// make animal writable by several groups
-			valuesToAddList.add(ct.createObservedValue(invName, "SetIsWritableByMolgenisRole", weanDate, null,
-					"IsWritableByMolgenisRole", animalName, "admin", null));
-			valuesToAddList.add(ct.createObservedValue(invName, "SetIsWritableByMolgenisRole", weanDate, null,
-					"IsWritableByMolgenisRole", animalName, "Caretakers", null));
-			valuesToAddList.add(ct.createObservedValue(invName, "SetIsWritableByMolgenisRole", weanDate, null,
-					"IsWritableByMolgenisRole", animalName, "panel_" + speciesName, null));
-			valuesToAddList.add(ct.createObservedValue(invName, "SetIsWritableByMolgenisRole", weanDate, null,
-					"IsWritableByMolgenisRole", animalName, "panel_" + lineName, null));
+			valuesToAddList.add(ct.createObservedValueWithProtocolApplication(invName, now, null,
+					"SetIsWritableByMolgenisRole", "IsWritableByMolgenisRole", animalName, "admin", null));
+			valuesToAddList.add(ct.createObservedValueWithProtocolApplication(invName, now, null,
+					"SetIsWritableByMolgenisRole", "IsWritableByMolgenisRole", animalName, "Caretakers", null));
+			valuesToAddList.add(ct
+					.createObservedValueWithProtocolApplication(invName, now, null, "SetIsWritableByMolgenisRole",
+							"IsWritableByMolgenisRole", animalName, "panel_" + speciesName, null));
+			valuesToAddList.add(ct.createObservedValueWithProtocolApplication(invName, now, null,
+					"SetIsWritableByMolgenisRole", "IsWritableByMolgenisRole", animalName, "panel_" + lineName, null));
 
 			animalNumber++;
 		}
