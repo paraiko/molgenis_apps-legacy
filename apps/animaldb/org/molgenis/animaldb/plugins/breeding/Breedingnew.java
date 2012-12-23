@@ -1346,6 +1346,19 @@ public class Breedingnew extends PluginModel<Entity>
 		individualValuesToAddList.add(ct.createObservedValueWithProtocolApplication(invName, weanDate, null,
 				"SetColor", "Color", animalName, colorA, null));
 
+		// Add security measurements
+		// make animal writable by several groups
+		individualValuesToAddList.add(ct.createObservedValueWithProtocolApplication(invName, weanDate, null,
+				"SetIsWritableByMolgenisRole", "IsWritableByMolgenisRole", animalName, "admin", null));
+		individualValuesToAddList.add(ct.createObservedValueWithProtocolApplication(invName, weanDate, null,
+				"SetIsWritableByMolgenisRole", "IsWritableByMolgenisRole", animalName, "Caretakers", null));
+		individualValuesToAddList.add(ct.createObservedValueWithProtocolApplication(invName, weanDate, null,
+				"SetIsWritableByMolgenisRole", "IsWritableByMolgenisRole", animalName,
+				"panel_" + ct.getMostRecentValueAsXrefName(targetName, "Species"), null));
+		individualValuesToAddList.add(ct.createObservedValueWithProtocolApplication(invName, weanDate, null,
+				"SetIsWritableByMolgenisRole", "IsWritableByMolgenisRole", animalName,
+				"panel_" + ct.getMostRecentValueAsXrefName(targetName, "Line"), null));
+
 		db.add(individualValuesToAddList);
 
 		genotypeTable.addRow(animalName);
