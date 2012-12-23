@@ -213,6 +213,9 @@ public class CommonService
 	{
 		Query<Investigation> q = db.query(Investigation.class);
 		q.addRules(new QueryRule(Investigation.OWNS_NAME, Operator.EQUALS, userName));
+		// always add investigation system
+		q.addRules(new QueryRule(Operator.OR));
+		q.addRules(new QueryRule(Investigation.NAME, Operator.EQUALS, "System"));
 		List<Investigation> invList;
 		List<String> returnList = new ArrayList<String>();
 		try
