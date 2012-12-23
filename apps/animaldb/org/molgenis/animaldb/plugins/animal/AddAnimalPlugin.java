@@ -539,13 +539,16 @@ public class AddAnimalPlugin extends EasyPluginController
 					featureNameList.get(12), animalName, "Caretakers", null));
 			valuesToAddList.add(ct.createObservedValue(invName, app.getName(), entryDate, null,
 					featureNameList.get(12), animalName, "admin", null));
+			valuesToAddList.add(ct.createObservedValue(invName, app.getName(), entryDate, null,
+					featureNameList.get(12), animalName, "panel_" + speciesName, null));
+
 			if (lineName != null && !lineName.equals(""))
 			{
 				Query<Panel> lineQuery = db.query(Panel.class);
 				lineQuery.addRules(new QueryRule(Panel.NAME, Operator.EQUALS, lineName));
 				int lineId = lineQuery.find().get(0).getId();
 				valuesToAddList.add(ct.createObservedValue(invName, app.getName(), entryDate, null,
-						featureNameList.get(12), animalName, "panel_" + lineId, null));
+						featureNameList.get(12), animalName, "panel_" + lineName, null));
 			}
 
 			animalCnt++;
