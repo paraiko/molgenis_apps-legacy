@@ -85,3 +85,4 @@ OldAnimalId;String;;;false;string;To store the AnimalId from the previous admini
 OldLitterId;String;;;false;string;To store the LitterId from the previous administration system on import into AnimalDB.
 IsReadableByMolgenisRole;String;;;false;string;To set a MolgenisRole (= user or usergroup) that can read this object.
 IsWritableByMolgenisRole;String;;;false;string;to set a MolgenisRole (= user or usergroup) that can edit this object.
+ImportTimestamp;TargetLink;panel;ImportTimestamp;false;xref;To mark and link animals that were imported in one batch via a timestamp.

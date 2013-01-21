@@ -691,13 +691,11 @@ public class ShowDecSubprojects extends PluginModel<Entity>
 				{
 					valuesToAddList.add(ct.createObservedValue(investigationName, protocolApplicationName, startdate,
 							enddate, "DecSubprojectApplicationPdf", name, decsubapplicationpdf, null));
-					System.out.println("################## subapppdf " + decsubapplicationpdf);
 				}
 				if (decsubapprovalpdf != null)
 				{
 					valuesToAddList.add(ct.createObservedValue(investigationName, protocolApplicationName, startdate,
 							enddate, "DecSubprojectApprovalPdf", name, decsubapprovalpdf, null));
-					System.out.println("################## subapprovalpdf " + decsubapprovalpdf);
 				}
 
 				valuesToAddList.add(ct.createObservedValue(investigationName, protocolApplicationName, startdate,
@@ -762,12 +760,24 @@ public class ShowDecSubprojects extends PluginModel<Entity>
 				List<String> measurementsToShow = new ArrayList<String>();
 				measurementsToShow.add("Active");
 				measurementsToShow.add("Experiment");
+				measurementsToShow.add("Sex");
+				measurementsToShow.add("Species");
 				List<MatrixQueryRule> filterRules = new ArrayList<MatrixQueryRule>();
 				filterRules.add(new MatrixQueryRule(MatrixQueryRule.Type.colValueProperty, ct
 						.getMeasurementId("Active"), ObservedValue.VALUE, Operator.EQUALS, "Alive"));
 				filterRules.add(new MatrixQueryRule(MatrixQueryRule.Type.colValueProperty, ct
 						.getMeasurementId("Experiment"), ObservedValue.RELATION, Operator.EQUALS,
 						getSelectedDecSubproject().getId()));
+				filterRules.add(new MatrixQueryRule(MatrixQueryRule.Type.colValueProperty, ct
+						.getMeasurementId("Experiment"), ObservedValue.ENDTIME, Operator.EQUALS, null)); // only
+																											// show
+																											// if
+																											// currently
+																											// active
+																											// in
+																											// the
+																											// experiment
+
 				// TODO: find a way to filter out only the animals that are
 				// CURRENTLY in this DEC subproject
 				remAnimalsMatrixViewer = new MatrixViewer(this, REMANIMALSMATRIX,
@@ -814,11 +824,19 @@ public class ShowDecSubprojects extends PluginModel<Entity>
 				List<MatrixQueryRule> filterRules = new ArrayList<MatrixQueryRule>();
 				filterRules.add(new MatrixQueryRule(MatrixQueryRule.Type.colValueProperty, ct
 						.getMeasurementId("Active"), ObservedValue.VALUE, Operator.EQUALS, "Alive"));
+				// add the animals that have been in an experiment before but
+				// are currently not
+
+				// add the animals that never have been in an experiment at all.
 				// filterRules.add(new
-				// MatrixQueryRule(MatrixQueryRule.Type.colValueProperty,
-				// ct.getMeasurementId("Experiment"),
-				// ObservedValue.RELATION, Operator.NOT,
-				// getSelectedDecSubproject().getId()));
+				// MatrixQueryRule(MatrixQueryRule.Type.colValueProperty, ct
+				// .getMeasurementId("Experiment"), ObservedValue.RELATION_NAME,
+				// Operator.NOT,
+				// getSelectedDecSubproject().getName()));
+				// filterRules.add(new
+				// MatrixQueryRule(MatrixQueryRule.Type.colValueProperty, ct
+				// .getMeasurementId("Experiment"), ObservedValue.ENDTIME,
+				// Operator.NOT, null));
 				// filterRules.add(new
 				// MatrixQueryRule(MatrixQueryRule.Type.colValueProperty,
 				// ct.getMeasurementId("Experiment"),
@@ -1243,12 +1261,8 @@ public class ShowDecSubprojects extends PluginModel<Entity>
 					tmpExp.setExperimentTitle(experimentTitle);
 					tmpExp.setExperimentNr(experimentNr);
 					// tmpExp.setDecSubprojectApplicationPDF(decSubprojectApplicationPDF);
-					System.out.println("------------> " + pdfDecSubApplication + " " + pdfDecSubApproval);
-
 					if (pdfDecSubApproval != null) tmpExp.setDecSubprojectApprovalPdf(pdfDecSubApproval);
 					if (pdfDecSubApplication != null) tmpExp.setDecSubprojectApplicationPdf(pdfDecSubApplication);
-					System.out.println("------------> " + tmpExp.getDecSubprojectApplicationPdf() + " "
-							+ tmpExp.getDecSubprojectApprovalPdf());
 					tmpExp.setConcern(concern);
 					tmpExp.setGoal(goal);
 					tmpExp.setSpecialTechn(specialTechn);
