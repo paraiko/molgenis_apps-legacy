@@ -108,12 +108,11 @@ public class BackgroundPlugin extends PluginModel<Entity>
 			{
 				String bkgName = request.getString("name");
 				String speciesName = request.getString("species");
+
 				// String investigationName =
 				// ct.getOwnUserInvestigationName(this.getLogin().getUserName());
-				String investigationName = "System"; // TODO remove old
-														// investigation code
-														// above.
-				ct.makePanel(investigationName, bkgName, this.getLogin().getUserName());
+				String investigationName = "System";
+				ct.createPanel(investigationName, bkgName);
 				db.add(ct.createObservedValueWithProtocolApplication(investigationName, new Date(), null,
 						"SetTypeOfGroup", "TypeOfGroup", bkgName, "Background", null));
 				db.add(ct.createObservedValueWithProtocolApplication(investigationName, new Date(), null, "SetSpecies",
