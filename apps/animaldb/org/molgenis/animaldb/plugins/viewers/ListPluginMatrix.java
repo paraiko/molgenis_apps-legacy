@@ -215,6 +215,8 @@ public class ListPluginMatrix extends EasyPluginController
 							true, 0, true, false, filterRules, null, true);
 
 					// enable animalDB specific traits (sorting filtering etc)
+					targetMatrixViewer.setShowQuickView(true);
+					targetMatrixViewer.setShowfilterSaveOptions(true);
 					targetMatrixViewer.setAPPLICATION_STRING("ANIMALDB");
 
 					// restore paging
@@ -253,6 +255,8 @@ public class ListPluginMatrix extends EasyPluginController
 							true, 2, true, false, filterRules, measurements, false);
 
 					// enable animalDB specific traits (sorting filtering etc)
+					targetMatrixViewer.setShowQuickView(true);
+					targetMatrixViewer.setShowfilterSaveOptions(true);
 					targetMatrixViewer.setAPPLICATION_STRING("ANIMALDB");
 
 					// restore paging

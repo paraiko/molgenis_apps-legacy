@@ -272,6 +272,8 @@ public class Breedingnew extends PluginModel<Entity>
 			motherMatrixViewer = new MatrixViewer(this, MOTHERMATRIX, SPMM, true, 2, false, false, motherFilterRules,
 					new MatrixQueryRule(MatrixQueryRule.Type.colHeader, Measurement.NAME, Operator.IN,
 							measurementsToShow));
+			motherMatrixViewer.setShowQuickView(true);
+			motherMatrixViewer.setShowfilterSaveOptions(true);
 		}
 		catch (Exception e)
 		{
@@ -334,6 +336,9 @@ public class Breedingnew extends PluginModel<Entity>
 			fatherMatrixViewer = new MatrixViewer(this, FATHERMATRIX, SPMF, true, 2, false, false, fatherFilterRules,
 					new MatrixQueryRule(MatrixQueryRule.Type.colHeader, Measurement.NAME, Operator.IN,
 							measurementsToShow));
+			fatherMatrixViewer.setShowQuickView(true);
+			fatherMatrixViewer.setShowfilterSaveOptions(true);
+
 		}
 		catch (Exception e)
 		{
@@ -377,6 +382,7 @@ public class Breedingnew extends PluginModel<Entity>
 			pgMatrixViewer = new MatrixViewer(this, PGMATRIX, new SliceablePhenoMatrix<Panel, Measurement>(Panel.class,
 					Measurement.class), true, 1, false, false, filterRules, new MatrixQueryRule(
 					MatrixQueryRule.Type.colHeader, Measurement.NAME, Operator.IN, measurementsToShow));
+			pgMatrixViewer.setShowTargetTooltip(true);
 
 		}
 		catch (Exception e)
