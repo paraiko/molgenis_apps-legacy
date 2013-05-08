@@ -58,11 +58,12 @@ adbsystem,app.ui.AnimalDBWelcomeScreenPlugin,read
 adbsystem,app.ui.manualmenuMenu,read
 adbsystem,app.ui.ManualPlugin,read
 adbsystem,app.ui.animalmenuMenu,read
-adbsystem,app.ui.DataViewerPlugin,read
 adbsystem,app.ui.TimelineViewerPlugin,read
+adbsystem,app.ui.EditAnimalPluginPlugin,read
 breeding,app.ui.ViewFamilyPlugin,read
 importAnimals,app.ui.AddAnimalPlugin,read
 breeding,app.ui.BreedingPlugin,read
+breeding,app.ui.BreedingOverviewPlugin,read
 removeAnimals,app.ui.RemAnimalPlugin,read
 adbsystem,app.ui.LocationManagementPluginPlugin,read
 adbsystem,app.ui.PrintLabelsPlugin,read
@@ -119,4 +120,4 @@ systemAdmin,app.ui.delindividualFormController,write
 systemAdmin,app.ui.delobservedvalueFormController,write
 systemAdmin,app.ui.FileStoragePlugin,write
 systemAdmin,app.ui.UserLoginPlugin,write
-
+systemAdmin,app.ui.DataViewerPlugin,write
