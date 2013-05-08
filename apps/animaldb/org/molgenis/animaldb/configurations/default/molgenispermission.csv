@@ -120,4 +120,4 @@ systemAdmin,app.ui.delindividualFormController,write
 systemAdmin,app.ui.delobservedvalueFormController,write
 systemAdmin,app.ui.FileStoragePlugin,write
 systemAdmin,app.ui.UserLoginPlugin,write
-systemAdmin,app.ui.DataViewerPlugin,write
+systemAdmin,app.ui.AnimalValuePowereditorPlugin,write
