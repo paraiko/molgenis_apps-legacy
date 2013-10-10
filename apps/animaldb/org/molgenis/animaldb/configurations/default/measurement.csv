@@ -19,6 +19,8 @@ WeanSize;Number;;;true;int;To set the wean size of a litter.
 WeanSizeFemale;Number;;;true;int;To set the number of females in a litter when weaning.
 WeanSizeMale;Number;;;true;int;To set the number of males in a litter when weaning.
 WeanSizeUnknown;Number;;;true;int;To set the number of animals of unknown sex in a litter when weaning.
+Generation;Number;;;true;int;To set the generation number since the onset of the breeding line.
+BreedingCageId;String;;;true;string;To set the breedingcage id of an animal (Typically used for establishing a rotating breeding scheme).
 Street;String;;;false;string;To set the street part of an address.
 Housenumber;Number;;;false;int;To set the house-number part of an address.
 City;String;;;false;string;To set the city part of an address.
@@ -33,7 +35,9 @@ Source;TargetLink;panel;Source;false;xref;To link an animal or a breeding line t
 Line;TargetLink;panel;Line;false;xref;To link a parentgroup to a breeding line.
 LineInfoLink;String;;;false;string;To provide a link to a website with information about this line.
 LineJAXName;String;;;false;string;To provide the full line name according to JAX mouse nomenclature
-LineFullName;String;;;false;string;To provide the full line name according to some internal nomenclature
+LineFullName;String;;;false;string;To provide the full line name according to some internal nomenclature.
+LineBreedingProtocol;String;;;false;string;To specify a breeding breeding strategy, This field will influence the behaviour of the breedingmodule.
+LineNrBreedingCages;String;;;false;string;To specify the number of cages used in a rotating breeding protocol. The content of this field will influence the behaviour of the breeding module.
 SourceType;String;;;false;string;To set the type of an animal source (used in VWA Report 4).
 SourceTypeSubproject;String;;;false;string;To set the animal's source type, when it enters a DEC subproject (used in VWA Report 5).
 ParticipantGroup;String;;;false;string;To set the participant group an animal is considered part of.
