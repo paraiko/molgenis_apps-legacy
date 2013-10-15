@@ -40,6 +40,8 @@
 						<th>Full name</th>
 						<th>Species</th>
 						<th>Source</th>
+						<th>Breeding protocol</th>
+						<th>Nr of breeding cages</th>
 						<th>Remarks</th>
 						<th></th>
 						
@@ -54,6 +56,8 @@
 						<td>${screen.getFullName(lineName)}</td>
 						<td>${screen.getSpeciesName(lineName)}</td>
 						<td>${screen.getSourceName(lineName)}</td>
+						<td>${screen.getBreedingProtocol(lineName)}</td>
+						<td>${screen.getNrBreedingCages(lineName)}</td>
 						<td>${screen.getRemarksString(lineName)}</td>
 						<td><a href='molgenis.do?__target=${screen.name}&__action=Delete&id=${line.id?string.computer}'><img id="delete_breedingline" class="edit_button" title="delete current record" alt="Delete" src="generated-res/img/delete.png"></a></td>
 					</tr>
@@ -102,14 +106,28 @@
 			</#if>
 		</select>
 	</div>
+	
+	<!-- BreedingProtocol -->
+	<div class='row'>
+		<label for='breedingprotocol'>Breeding Protocol:</label>
+		<input type='text' class='textbox' name='breedingprotocol' id='breedingprotocol' value='<#if screen.breedingProtocol?exists>${screen.getBreedingProtocol()}</#if>' />
+	</div>
+	<!-- NrBreedingCages -->
+	<div class='row'>
+		<label for='nrbreedingcages'>Nr of Breedingcages:</label>
+		<input type='text' class='textbox' name='nrbreedingcages' id='nrbreedingcages' value='<#if screen.nrBreedingCages?exists>${screen.getNrBreedingCages()}</#if>' />
+	</div>
 	<!-- Remarks -->
 	<div class='row'>
 		<label for='remarks'>Remarks:</label>
 		<input type='text' class='textbox' name='remarks' id='remarks' value='<#if screen.remarks?exists>${screen.getRemarks()}</#if>' />
 	</div>
+	
 	<!-- Add button -->
 	<div id='buttons_part' class='row'>
 		<input type='submit' id='add' class='addbutton' <#if screen.lineName?exists>value='Update' onclick="__action.value='updateLine'" <#else>value='Add' onclick="__action.value='addLine'" </#if> />
+
+		<input type='submit' id='cancel' class='addbutton' value='cancel' onclick="__action.value='cancel'" />
 	</div>
 	
 </div>

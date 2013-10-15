@@ -38,6 +38,8 @@ public class ManageLines extends PluginModel<Entity>
 	private String sourceName;
 	private String speciesName;
 	private String remarks;
+	private String breedingProtocol;
+	private String nrBreedingCages;
 	private int lineId = -1;
 
 	private List<ObservationTarget> sourceList;
@@ -105,7 +107,7 @@ public class ManageLines extends PluginModel<Entity>
 		return sourceName;
 	}
 
-	public String getSpeciesName(String lineName)
+	public String getSpeciesName(String lineName) throws DatabaseException
 	{
 		String speciesName;
 		try
@@ -114,7 +116,8 @@ public class ManageLines extends PluginModel<Entity>
 		}
 		catch (Exception e)
 		{
-			speciesName = "Error when retrieving species";
+			speciesName = "Error when retrieving species"; // FIXME: improper
+															// errorhandling!!!
 		}
 		return speciesName;
 	}
@@ -138,7 +141,28 @@ public class ManageLines extends PluginModel<Entity>
 		}
 		catch (Exception e)
 		{
-			returnString = "Error when retrieving remarks";
+			returnString = "Error when retrieving remarks"; // FIXME: improper
+			// errorhandling!!!
+		}
+		return returnString;
+	}
+
+	public String getBreedingProtocol(String lineName) throws DatabaseException, ParseException
+	{
+		String returnString = "";
+		if (cs.getMostRecentValueAsString(lineName, "LineBreedingProtocol") != null)
+		{
+			returnString = cs.getMostRecentValueAsString(lineName, "LineBreedingProtocol");
+		}
+		return returnString;
+	}
+
+	public String getNrBreedingCages(String lineName) throws DatabaseException, ParseException
+	{
+		String returnString = "";
+		if (cs.getMostRecentValueAsString(lineName, "LineNrBreedingCages") != null)
+		{
+			returnString = cs.getMostRecentValueAsString(lineName, "LineNrBreedingCages");
 		}
 		return returnString;
 	}
@@ -151,6 +175,18 @@ public class ManageLines extends PluginModel<Entity>
 		{
 			String action = request.getString("__action");
 
+			if (action.equals("cancel"))
+			{
+				lineId = -1;
+				lineName = null;
+				fullName = null;
+				speciesName = null;
+				sourceName = null;
+				remarks = null;
+				breedingProtocol = null;
+				nrBreedingCages = null;
+			}
+
 			if (action.equals("Edit"))
 			{
 				lineId = request.getInt("id");
@@ -159,6 +195,8 @@ public class ManageLines extends PluginModel<Entity>
 				speciesName = this.getSpeciesName(lineName);
 				sourceName = this.getSourceName(lineName);
 				remarks = this.getRemarksString(lineName);
+				breedingProtocol = this.getBreedingProtocol(lineName);
+				nrBreedingCages = this.getNrBreedingCages(lineName);
 			}
 
 			if (action.equals("Delete"))
@@ -231,6 +269,27 @@ public class ManageLines extends PluginModel<Entity>
 
 				}
 
+				// Set BreedingProtocol
+				if (request.getString("breedingprotocol") != null)
+				{
+					breedingProtocol = request.getString("breedingprotocol");
+					List<ObservedValue> ovl = cs.getObservedValuesByTargetAndFeature(lineName, "LineBreedingProtocol",
+							invNames, invName);
+					ovl.get(0).setValue(breedingProtocol);
+					db.update(ovl.get(0));
+				}
+
+				// Set NrBreedingCages
+				if (request.getString("nrbreedingcages") != null)
+				{
+					nrBreedingCages = request.getString("nrbreedingcages");
+					List<ObservedValue> ovl = cs.getObservedValuesByTargetAndFeature(lineName, "LineNrBreedingCages",
+							invNames, invName);
+					ovl.get(0).setValue(nrBreedingCages);
+					db.update(ovl.get(0));
+
+				}
+
 				// Reset everything so form is empty again
 				lineId = -1;
 				lineName = null;
@@ -238,6 +297,8 @@ public class ManageLines extends PluginModel<Entity>
 				speciesName = null;
 				sourceName = null;
 				remarks = null;
+				breedingProtocol = null;
+				nrBreedingCages = null;
 
 			}
 			if (action.equals("addLine"))
@@ -265,7 +326,14 @@ public class ManageLines extends PluginModel<Entity>
 				}
 				// Mark group as Line using a special event
 				db.add(cs.createObservedValueWithProtocolApplication(invName, now, null, "SetTypeOfGroup",
-						"TypeOfGroup", lineName, "Line", null));
+						"TypeOfGroup", lineName, "Line", null)); // FIXME: check
+																	// if this
+																	// results
+																	// in double
+																	// labeling
+																	// on
+																	// update...
+
 				// Set full name
 				if (request.getString("fullname") != null)
 				{
@@ -288,6 +356,23 @@ public class ManageLines extends PluginModel<Entity>
 					db.add(cs.createObservedValueWithProtocolApplication(invName, now, null, "SetRemark", "Remark",
 							lineName, remarks, null));
 				}
+
+				// Set BreedingProtocol
+				if (request.getString("breedingprotocol") != null)
+				{
+					breedingProtocol = request.getString("breedingprotocol");
+					db.add(cs.createObservedValueWithProtocolApplication(invName, now, null, "SetLineBreedingProtocol",
+							"LineBreedingProtocol", lineName, breedingProtocol, null));
+				}
+
+				// Set NrBreedingCages
+				if (request.getString("nrbreedingcages") != null)
+				{
+					nrBreedingCages = request.getString("nrbreedingcages");
+					db.add(cs.createObservedValueWithProtocolApplication(invName, now, null, "SetLineNrBreedingCages",
+							"LineNrBreedingCages", lineName, nrBreedingCages, null));
+				}
+
 				// create new panel user group so users that are member of this
 				// group have access to all animals in this line(use id as name
 				MolgenisGroup mg = new MolgenisGroup();
@@ -445,5 +530,20 @@ public class ManageLines extends PluginModel<Entity>
 	public void setLineList(List<ObservationTarget> lineList)
 	{
 		this.lineList = lineList;
+	}
+
+	public String getBreedingProtocol()
+	{
+		return this.breedingProtocol;
+	}
+
+	public void setBreedingProtocol(String breedingProtocol)
+	{
+		this.breedingProtocol = breedingProtocol;
+	}
+
+	public String getNrBreedingCages()
+	{
+		return this.nrBreedingCages;
 	}
 }

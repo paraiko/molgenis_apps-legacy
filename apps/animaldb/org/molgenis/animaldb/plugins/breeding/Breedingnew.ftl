@@ -144,6 +144,14 @@
 		<input type="checkbox" id="sizeapp_toggle" name="sizeapp_toggle" value="sizeapp" checked="yes" />
 	</div>
 	<div style="clear:both; display:block">
+		<label style="width:16em;float:left;" for="sizeapp_toggle">Litter generation:</label>
+		<input type='text' class="text ui-widget-content ui-corner-all" name='littergeneration' id='littergeneration' value='<#if screen.generation?exists>${screen.getGeneration()}</#if>' />
+	</div>
+	<div style="clear:both; display:block">
+		<label style="width:16em;float:left;" for="sizeapp_toggle">Breeding Cage Id:</label>
+		<input type='text' class="text ui-widget-content ui-corner-all" name='litterbreedingcageid' id='litterbreedingcageid' value='<#if screen.breedingCageId?exists>${screen.getBreedingCageId()}</#if>' />
+	</div>
+	<div style="clear:both; display:block">
 		<label style="width:16em;float:left;" for='litterremarks'>Remarks:</label>
 		<input type='text' class="text ui-widget-content ui-corner-all" name='litterremarks' id='litterremarks' value='<#if screen.litterRemarks?exists>${screen.getLitterRemarks()}</#if>' />
 	</div>

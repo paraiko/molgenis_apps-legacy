@@ -41,6 +41,7 @@ import org.molgenis.framework.ui.html.JQueryDataTable;
 import org.molgenis.framework.ui.html.SelectInput;
 import org.molgenis.framework.ui.html.StringInput;
 import org.molgenis.framework.ui.html.Table;
+import org.molgenis.framework.ui.html.TextInput;
 import org.molgenis.matrix.MatrixException;
 import org.molgenis.matrix.component.MatrixViewer;
 import org.molgenis.matrix.component.SliceablePhenoMatrix;
@@ -78,6 +79,8 @@ public class Breedingnew extends PluginModel<Entity>
 	private static String LITTERMATRIX = "littermatrix";
 	private String action = "init";
 	private String userName = null;
+	private List<String> investigationNames = null;
+	private List<Integer> investigationIds = null;
 	private String motherMatrixViewerString;
 	private String fatherMatrixViewerString;
 	private String pgMatrixViewerString;
@@ -88,6 +91,8 @@ public class Breedingnew extends PluginModel<Entity>
 	private SimpleDateFormat newDateOnlyFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 	private String remarks = null;
 	private String selectedParentgroup = null;
+	private String generation = null;
+	private String breedingCageId = null;
 	private int litterSize;
 	private boolean litterSizeApproximate;
 	private String locName = null;
@@ -411,10 +416,12 @@ public class Breedingnew extends PluginModel<Entity>
 		listOfMeasurements.add("GenotypeDate");
 		listOfMeasurements.add("Line");
 		listOfMeasurements.add("Parentgroup");
-		listOfMeasurements.add("Remark");
 		listOfMeasurements.add("Size");
+		listOfMeasurements.add("Generation");
+		listOfMeasurements.add("BreedingCageId");
 		listOfMeasurements.add("WeanDate");
 		listOfMeasurements.add("WeanSize");
+		listOfMeasurements.add("Remark");
 
 		return listOfMeasurements;
 	}
@@ -881,6 +888,122 @@ public class Breedingnew extends PluginModel<Entity>
 				{
 					this.entity = "Litters"; // switch to litter view
 					this.selectedParentgroup = ct.getObservationTargetLabel((targetList.get(0)));
+
+					// prepare generation and breedingcage id parameters
+					// get highest parent generation and increase by 1 for
+					// litter.
+					Integer highestGen = 0;
+					// List<ObservedValue> mothers =
+					// ct.getObservedValuesByTargetAndMeasurement(this.selectedParentgroup,
+					// "ParentgroupMother", this.investigationIds);
+					// List<ObservedValue> fathers =
+					// ct.getObservedValuesByTargetAndMeasurement(this.selectedParentgroup,
+					// "ParentgroupFather", this.investigationIds);
+					List<ObservedValue> parents = new ArrayList<ObservedValue>(
+							ct.getObservedValuesByTargetAndMeasurement(this.selectedParentgroup, "ParentgroupMother",
+									this.investigationIds));
+					parents.addAll(ct.getObservedValuesByTargetAndMeasurement(this.selectedParentgroup,
+							"ParentgroupFather", this.investigationIds));
+
+					// List<ObservedValue> parents = new
+					// ArrayList<ObservedValue>();
+					List<String> bCIds = new ArrayList<String>();
+
+					if (parents != null)
+					{
+						for (ObservedValue each : parents)
+						{
+							// Generation
+							String genString = ct.getMostRecentValueAsString(each.getRelation_Name(), "Generation");
+							if (genString != null)
+							{
+								Integer gen = Integer.parseInt(genString);
+								if (gen > highestGen)
+								{
+									highestGen = gen;
+								}
+							}
+
+							// collect all BreedingcageId's from parents
+							String breedingCageIdString = ct.getMostRecentValueAsString(each.getRelation_Name(),
+									"BreedingCageId");
+							if (breedingCageIdString != null)
+							{
+								bCIds.add(breedingCageIdString);
+							}
+						}
+					}
+
+					// if (fathers != null)
+					// {
+					// for (ObservedValue each : fathers)
+					// {
+					// String genString =
+					// ct.getMostRecentValueAsString(each.getRelation_Name(),
+					// "Generation");
+					// if (genString != null)
+					// {
+					// Integer gen = Integer.parseInt(genString);
+					// if (gen > highestGen)
+					// {
+					// highestGen = gen;
+					// }
+					// }
+					// }
+					// }
+
+					// set generation
+					if (highestGen == 0)
+					{
+						this.generation = null;
+					}
+					else
+					{
+						highestGen++;
+						this.generation = String.valueOf(highestGen);
+					}
+
+					// Set breedingcage id
+					String breedingProtocol = ct.getMostRecentValueAsString(this.line, "LineBreedingProtocol");
+					System.out.println("#######@@@@@@@@@@@@@@" + breedingProtocol);
+					if (breedingProtocol != null && breedingProtocol.equals("rotating"))
+					{
+						System.out.println("#######@@@@@@@@@@@@@@2 Do I get in breedingprot? " + bCIds);
+						int bcid = 0;
+						Boolean validBCId = false;
+						if (bCIds.size() > 0)
+						{
+							bcid = Integer.parseInt(bCIds.get(0));
+							validBCId = true;
+							if (bCIds.size() > 1)
+							{
+								for (int i = 1; i < bCIds.size(); i++)
+								{
+									int nextBcid = Integer.parseInt(bCIds.get(i));
+									if (nextBcid != bcid)
+									{
+										validBCId = false;
+									}
+								}
+							}
+						}
+						if (validBCId)
+						{
+							int nrbrcages = Integer
+									.parseInt(ct.getMostRecentValueAsString(line, "LineNrBreedingCages"));
+							if (bcid == nrbrcages)
+							{
+								this.breedingCageId = "1";
+							}
+							else
+							{
+								bcid++;
+								this.breedingCageId = String.valueOf(bcid);
+							}
+						}
+
+					}
+
 				}
 				else
 				{
@@ -1585,8 +1708,10 @@ public class Breedingnew extends PluginModel<Entity>
 		genotypeTable.addColumn("Color");
 		genotypeTable.addColumn("Earmark");
 		genotypeTable.addColumn("Background");
+		genotypeTable.addColumn("Generation");
 		genotypeTable.addColumn("Gene modification");
 		genotypeTable.addColumn("Gene state");
+
 		int row = 0;
 		for (Individual animal : getAnimalsInLitter(db))
 		{
@@ -1648,26 +1773,38 @@ public class Breedingnew extends PluginModel<Entity>
 			backgroundInput.setWidth(-1);
 			genotypeTable.setCell(4, row, backgroundInput);
 
+			// Generation
+			StringInput generationInput = new StringInput("5_" + row);
+
+			String generationInputString = ct.getMostRecentValueAsString(animalName, "Generation");
+			if (generationInputString != null)
+			{
+				generationInput.setValue(generationInputString);
+			}
+			generationInput.setWidth(-1);
+			genotypeTable.setCell(5, row, generationInput);
+
 			// TODO: show columns and selectboxes for ALL set geno mods
 
 			// Gene mod name (1)
-			SelectInput geneNameInput = new SelectInput("5_" + row);
+			SelectInput geneNameInput = new SelectInput("6_" + row);
 			for (String geneName : this.geneNameList)
 			{
 				geneNameInput.addOption(geneName, geneName);
 			}
 			geneNameInput.setValue(getAnimalGeneInfo("GeneModification", animalName, 0, db));
 			geneNameInput.setWidth(-1);
-			genotypeTable.setCell(5, row, geneNameInput);
+			genotypeTable.setCell(6, row, geneNameInput);
 			// Gene state (1)
-			SelectInput geneStateInput = new SelectInput("6_" + row);
+			SelectInput geneStateInput = new SelectInput("7_" + row);
 			for (String geneState : this.geneStateList)
 			{
 				geneStateInput.addOption(geneState, geneState);
 			}
 			geneStateInput.setValue(getAnimalGeneInfo("GeneState", animalName, 0, db));
 			geneStateInput.setWidth(-1);
-			genotypeTable.setCell(6, row, geneStateInput);
+			genotypeTable.setCell(7, row, geneStateInput);
+
 			row++;
 		}
 		action = "editIndividual";
@@ -1724,14 +1861,13 @@ public class Breedingnew extends PluginModel<Entity>
 			inputActive.setValue("");
 
 		}
-		// editTable.setCell(row, 0, inputActive);
 		editTable.setCell(0, row, inputActive);
 		row++;
+
 		// DateOfBirth
 		DateInput dateInputBirthDate = new DateInput("DateOfBirth");
 		dateInputBirthDate.setDateFormat("yyyy-MM-dd");
 		String maxD = observableFeat.get("WeanDate") == null ? "" : observableFeat.get("WeanDate");
-		// dateInputBirthDate.setJqueryproperties("maxDate: "newDateOnlyFormat.parse(observableFeat.get("WeanDate")"")
 		if (observableFeat.containsKey("DateOfBirth"))
 		{
 
@@ -1754,6 +1890,7 @@ public class Breedingnew extends PluginModel<Entity>
 		}
 		editTable.setCell(0, row, dateInputBirthDate);
 		row++;
+
 		// GenotypeDate
 		DateInput dateInputGenotypeDate = new DateInput("GenotypeDate");
 		dateInputGenotypeDate.setDateFormat("yyyy-MM-dd");
@@ -1775,11 +1912,10 @@ public class Breedingnew extends PluginModel<Entity>
 			dateInputGenotypeDate.setValue(null);
 
 		}
-
 		editTable.setCell(0, row, dateInputGenotypeDate);
 		row++;
-		// Line
 
+		// Line
 		StringInput inputLine = new StringInput("Line");
 		inputLine.setId("Line");
 		inputLine.setReadonly(true);
@@ -1801,14 +1937,11 @@ public class Breedingnew extends PluginModel<Entity>
 		}
 		editTable.setCell(0, row, inputLine);
 		row++;
+
 		// Parentgroup
-
 		Query<ObservedValue> query = db.query(ObservedValue.class);
-
 		query.addRules(new QueryRule(ObservedValue.TARGET_NAME, Operator.EQUALS, this.litter));
-
 		query.addRules(new QueryRule(ObservedValue.FEATURE_NAME, Operator.EQUALS, "Parentgroup"));
-
 		query.find().get(0);
 
 		StringInput inputParentGroup = new StringInput("Parentgroup");
@@ -1826,21 +1959,7 @@ public class Breedingnew extends PluginModel<Entity>
 		}
 		editTable.setCell(0, row, inputParentGroup);
 		row++;
-		// Remark
-		StringInput inputRemark = new StringInput("Remark");
-		if (observableFeat.containsKey("Remark"))
-		{
 
-			inputRemark.setValue(observableFeat.get("Remark"));
-		}
-		else
-		{
-			inputRemark.setValue("");
-
-		}
-		editTable.setCell(0, row, inputRemark);
-
-		row++;
 		// Size
 		StringInput inputSize = new StringInput("Size");
 		if (observableFeat.containsKey("Size"))
@@ -1855,6 +1974,33 @@ public class Breedingnew extends PluginModel<Entity>
 		}
 		editTable.setCell(0, row, inputSize);
 		row++;
+
+		// Generation
+		StringInput inputGeneration = new StringInput("Generation");
+		if (observableFeat.containsKey("Generation"))
+		{
+			inputGeneration.setValue(observableFeat.get("Generation"));
+		}
+		else
+		{
+			inputGeneration.setValue(null);
+		}
+		editTable.setCell(0, row, inputGeneration);
+		row++;
+
+		// BreedingCageId
+		StringInput inputBreedingCageId = new StringInput("BreedingCageId");
+		if (observableFeat.containsKey("BreedingCageId"))
+		{
+			inputBreedingCageId.setValue(observableFeat.get("BreedingCageId"));
+		}
+		else
+		{
+			inputBreedingCageId.setValue(null);
+		}
+		editTable.setCell(0, row, inputBreedingCageId);
+		row++;
+
 		// WeanDate
 		DateInput dateInputWeanDate = new DateInput("WeanDate");
 		dateInputWeanDate.setDateFormat("yyyy-MM-dd");
@@ -1876,6 +2022,7 @@ public class Breedingnew extends PluginModel<Entity>
 		}
 		editTable.setCell(0, row, dateInputWeanDate);
 		row++;
+
 		// WeanSize
 		StringInput inputWeanSize = new StringInput("WeanSize");
 		inputWeanSize.setReadonly(true);
@@ -1893,6 +2040,22 @@ public class Breedingnew extends PluginModel<Entity>
 
 		}
 		editTable.setCell(0, row, inputWeanSize);
+		row++;
+
+		// Remark
+		TextInput inputRemark = new TextInput("Remark");
+		if (observableFeat.containsKey("Remark"))
+		{
+
+			inputRemark.setValue(observableFeat.get("Remark"));
+		}
+		else
+		{
+			inputRemark.setValue("");
+
+		}
+		editTable.setCell(0, row, inputRemark);
+		row++;
 	}
 
 	private void editLitterToDb(Database db, MolgenisRequest request) throws Exception
@@ -2140,7 +2303,8 @@ public class Breedingnew extends PluginModel<Entity>
 	public void reload(Database db)
 	{
 		ct.setDatabase(db);
-		List<String> investigationNames = ct.getAllUserInvestigationNames(this.getLogin().getUserName());
+		this.investigationNames = ct.getAllUserInvestigationNames(this.getLogin().getUserName());
+		this.investigationIds = ct.getAllUserInvestigationIds(this.getLogin().getUserName());
 
 		// Populate lists (do this on every reload so they keep fresh, and do it
 		// here
@@ -2359,6 +2523,15 @@ public class Breedingnew extends PluginModel<Entity>
 		// Add everything to DB
 		db.add(valuesToAddList);
 
+		// Set Generation based on parents (parents + 1)
+		if (this.generation != null)
+		{
+			db.add(ct.createObservedValueWithProtocolApplication(invName, eventDate, null, "SetGeneration",
+					"Generation", litterName, this.generation, null));
+		}
+
+		// Set BreedingCageId and breeding protocol (
+
 		return litterName;
 	}
 
@@ -2392,6 +2565,17 @@ public class Breedingnew extends PluginModel<Entity>
 			{
 				weanSizeUnknown = request.getInt("weansizeunknown");
 			}
+
+			if (request.getInt("littergeneration") != null)
+			{
+				this.generation = String.valueOf(request.getInt("littergeneration"));
+			}
+
+			if (request.getInt("litterbreedingcageid") != null)
+			{
+				this.breedingCageId = String.valueOf(request.getInt("litterbreedingcageid"));
+			}
+
 			remarks = request.getString("remarks");
 			if (request.getString("namebase") != null)
 			{
@@ -2477,14 +2661,22 @@ public class Breedingnew extends PluginModel<Entity>
 
 		// Source (take from litter)
 		String sourceName = ct.getMostRecentValueAsXrefName(litter, "Source");
+
 		// Get litter birth date
 		String litterBirthDateString = ct.getMostRecentValueAsString(litter, "DateOfBirth");
-		// Date litterBirthDate =
-		// newDateOnlyFormat.parse(litterBirthDateString);
+
+		// get generation from litter
+		String litterGenerationString = ct.getMostRecentValueAsString(litter, "Generation");
+
+		// get breedingCageId
+		String litterBreedingCageIdString = ct.getMostRecentValueAsString(litter, "BreedingCageId");
+
 		// Find Parentgroup for this litter
 		String parentgroupName = ct.getMostRecentValueAsXrefName(litter, "Parentgroup");
+
 		// Find Line for this Parentgroup
 		String lineName = ct.getMostRecentValueAsXrefName(parentgroupName, "Line");
+
 		String animalType = "";
 		String speciesName = "";
 		String color = "";
@@ -2521,8 +2713,6 @@ public class Breedingnew extends PluginModel<Entity>
 			color = ct.getMostRecentValueAsString(motherName, "Color");
 			motherBackgroundName = ct.getMostRecentValueAsXrefName(motherName, "Background");
 
-			// HUGE
-			// to each other?, via prot app??
 			motherAllGeneMods = ct.getObservedValuesByTargetAndMeasurement(motherName, "GeneModification",
 					investigationIds); // this does not
 										// work,
@@ -2681,6 +2871,13 @@ public class Breedingnew extends PluginModel<Entity>
 			// Set 'Date of Birth'
 			valuesToAddList.add(ct.createObservedValueWithProtocolApplication(invName, weanDate, null,
 					"SetDateOfBirth", "DateOfBirth", animalName, litterBirthDateString, null));
+			// Set 'Generation'
+			valuesToAddList.add(ct.createObservedValueWithProtocolApplication(invName, weanDate, null, "SetGeneration",
+					"Generation", animalName, litterGenerationString, null));
+			// Set 'Date of Birth'
+			valuesToAddList.add(ct.createObservedValueWithProtocolApplication(invName, weanDate, null,
+					"SetBreedingCageId", "BreedingCageId", animalName, litterBreedingCageIdString, null));
+
 			// Set species
 			if (speciesName != null)
 			{
@@ -3223,11 +3420,26 @@ public class Breedingnew extends PluginModel<Entity>
 					db.update(value);
 				}
 			}
+			// Set generation
+			String generation = request.getString("5_" + animalCount);
+			value = ct.getObservedValuesByTargetAndFeature(animal.getName(), "Generation", investigationNames, invName)
+					.get(0);
+			value.setValue(generation);
+			if (value.getProtocolApplication_Id() == null)
+			{
+				String paName1 = ct.makeProtocolApplication(invName, "SetGeneration");
+				value.setProtocolApplication_Name(paName1);
+				db.add(value);
+			}
+			else
+			{
+				db.update(value);
+			}
 
 			// Set genotype(s)
 			for (int genoNr = 0; genoNr < nrOfGenotypes; genoNr++)
 			{
-				int currCol = 5 + (genoNr * 2);
+				int currCol = 6 + (genoNr * 2);
 				String paName = ct.makeProtocolApplication(invName, "SetGenotype");
 				String geneName = request.getString(currCol + "_" + animalCount);
 				if (geneName == null || geneName.equals(""))
@@ -3257,6 +3469,7 @@ public class Breedingnew extends PluginModel<Entity>
 				{
 					db.update(value);
 				}
+
 				String geneState = request.getString((currCol + 1) + "_" + animalCount);
 				valueList = ct.getObservedValuesByTargetAndFeature(animal.getName(), "GeneState", investigationNames,
 						invName);
@@ -3805,5 +4018,25 @@ public class Breedingnew extends PluginModel<Entity>
 	public void setLitterList(List<String> litterList)
 	{
 		this.litterList = litterList;
+	}
+
+	public String getGeneration()
+	{
+		return generation;
+	}
+
+	public String getBreedingCageId()
+	{
+		return breedingCageId;
+	}
+
+	public void setGeneration(String generation)
+	{
+		this.generation = generation;
+	}
+
+	public void setBreedingCageId(String breedingCageId)
+	{
+		this.breedingCageId = breedingCageId;
 	}
 }
