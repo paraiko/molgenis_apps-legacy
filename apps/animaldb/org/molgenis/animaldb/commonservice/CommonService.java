@@ -1029,42 +1029,6 @@ public class CommonService
 	}
 
 	/**
-	 * For a given ObservationTarget and ObservableFeature, returns all
-	 * ObservedValues.
-	 * 
-	 * @param targetName
-	 * @param featureName
-	 * @return String: the most recent value for given feature and target
-	 * @throws DatabaseException
-	 * @throws ParseException
-	 */
-	public List<ObservedValue> getObservedValuesForTargetAndMeasurement(String targetName, String featureName)
-			throws DatabaseException, ParseException
-	{
-		Query<ObservedValue> q = db.query(ObservedValue.class);
-		q.addRules(new QueryRule(ObservedValue.TARGET_NAME, Operator.EQUALS, targetName));
-		q.addRules(new QueryRule(ObservedValue.FEATURE_NAME, Operator.EQUALS, featureName));
-		q.addRules(new QueryRule(Operator.SORTDESC, ObservedValue.TIME));
-		// Discussion: if you uncomment the next line, only values are retrieved
-		// that have endtime 'null', i.e. values that are still valid.
-		// Is this desirable? Maybe we could use a boolean to switch this
-		// behavior on and off?
-		// q.addRules(new QueryRule(ObservedValue.ENDTIME, Operator.EQUALS,
-		// null));
-		List<ObservedValue> valueList = q.find();
-		if (valueList.size() > 0)
-		{
-			List<ObservedValue> returnValue = valueList; // default is first
-															// one
-			return returnValue;
-		}
-		else
-		{
-			return null;
-		}
-	}
-
-	/**
 	 * For a given ObservationTarget and ObservableFeature, returns the value of
 	 * the most recent ObservedValue, based on the timestamp of its
 	 * ProtocolApplication. Returns null if none found.
