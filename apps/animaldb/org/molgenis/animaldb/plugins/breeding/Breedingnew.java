@@ -1703,14 +1703,15 @@ public class Breedingnew extends PluginModel<Entity>
 		nrOfGenotypes = 1;
 		// Prepare table
 		genotypeTable = new JQueryDataTable("GenoTable", "");
-		genotypeTable.addColumn("Birth date");
-		genotypeTable.addColumn("Sex");
-		genotypeTable.addColumn("Color");
-		genotypeTable.addColumn("Earmark");
-		genotypeTable.addColumn("Background");
-		genotypeTable.addColumn("Generation");
-		genotypeTable.addColumn("Gene modification");
-		genotypeTable.addColumn("Gene state");
+		genotypeTable.addColumn("Birth date"); // 0
+		genotypeTable.addColumn("Sex"); // 1
+		genotypeTable.addColumn("Color"); // 2
+		genotypeTable.addColumn("Earmark"); // 3
+		genotypeTable.addColumn("Background"); // 4
+		genotypeTable.addColumn("Generation"); // 5
+		genotypeTable.addColumn("BreedingCageId"); // 6
+		genotypeTable.addColumn("Gene modification"); // 7
+		genotypeTable.addColumn("Gene state"); // 8
 
 		int row = 0;
 		for (Individual animal : getAnimalsInLitter(db))
@@ -1754,6 +1755,7 @@ public class Breedingnew extends PluginModel<Entity>
 			colorInput.setValue(getAnimalColor(animalName));
 			colorInput.setWidth(-1);
 			genotypeTable.setCell(2, row, colorInput);
+
 			// Earmark
 			SelectInput earmarkInput = new SelectInput("3_" + row);
 			for (Category earmark : this.earmarkList)
@@ -1763,6 +1765,7 @@ public class Breedingnew extends PluginModel<Entity>
 			earmarkInput.setValue(getAnimalEarmark(animalName));
 			earmarkInput.setWidth(-1);
 			genotypeTable.setCell(3, row, earmarkInput);
+
 			// Background
 			SelectInput backgroundInput = new SelectInput("4_" + row);
 			for (ObservationTarget background : this.backgroundList)
@@ -1784,26 +1787,37 @@ public class Breedingnew extends PluginModel<Entity>
 			generationInput.setWidth(-1);
 			genotypeTable.setCell(5, row, generationInput);
 
+			// BreedingCageId
+			StringInput breedingcageidInput = new StringInput("6_" + row);
+
+			String breedingcageidInputString = ct.getMostRecentValueAsString(animalName, "BreedingCageId");
+			if (breedingcageidInputString != null)
+			{
+				breedingcageidInput.setValue(breedingcageidInputString);
+			}
+			breedingcageidInput.setWidth(-1);
+			genotypeTable.setCell(6, row, breedingcageidInput);
+
 			// TODO: show columns and selectboxes for ALL set geno mods
 
 			// Gene mod name (1)
-			SelectInput geneNameInput = new SelectInput("6_" + row);
+			SelectInput geneNameInput = new SelectInput("7_" + row);
 			for (String geneName : this.geneNameList)
 			{
 				geneNameInput.addOption(geneName, geneName);
 			}
 			geneNameInput.setValue(getAnimalGeneInfo("GeneModification", animalName, 0, db));
 			geneNameInput.setWidth(-1);
-			genotypeTable.setCell(6, row, geneNameInput);
+			genotypeTable.setCell(7, row, geneNameInput);
 			// Gene state (1)
-			SelectInput geneStateInput = new SelectInput("7_" + row);
+			SelectInput geneStateInput = new SelectInput("8_" + row);
 			for (String geneState : this.geneStateList)
 			{
 				geneStateInput.addOption(geneState, geneState);
 			}
 			geneStateInput.setValue(getAnimalGeneInfo("GeneState", animalName, 0, db));
 			geneStateInput.setWidth(-1);
-			genotypeTable.setCell(7, row, geneStateInput);
+			genotypeTable.setCell(8, row, geneStateInput);
 
 			row++;
 		}
@@ -2835,6 +2849,19 @@ public class Breedingnew extends PluginModel<Entity>
 				valuesToAddList.add(ct.createObservedValueWithProtocolApplication(invName, weanDate, null, "SetLine",
 						"Line", animalName, null, lineName));
 			}
+			// Set generation on animal
+			if (litterGenerationString != null)
+			{
+				valuesToAddList.add(ct.createObservedValueWithProtocolApplication(invName, weanDate, null,
+						"SetGeneration", "Generation", animalName, null, litterGenerationString));
+			}
+			// Set generation on animal
+			if (litterBreedingCageIdString != null)
+			{
+				valuesToAddList.add(ct.createObservedValueWithProtocolApplication(invName, weanDate, null,
+						"SetBreedingCageId", "BreedingCageId", animalName, null, litterBreedingCageIdString));
+			}
+
 			// Set responsible researcher
 			if (respres != null)
 			{
@@ -2872,11 +2899,14 @@ public class Breedingnew extends PluginModel<Entity>
 			valuesToAddList.add(ct.createObservedValueWithProtocolApplication(invName, weanDate, null,
 					"SetDateOfBirth", "DateOfBirth", animalName, litterBirthDateString, null));
 			// Set 'Generation'
-			valuesToAddList.add(ct.createObservedValueWithProtocolApplication(invName, weanDate, null, "SetGeneration",
-					"Generation", animalName, litterGenerationString, null));
+			// valuesToAddList.add(ct.createObservedValueWithProtocolApplication(invName,
+			// weanDate, null, "SetGeneration",
+			// "Generation", animalName, litterGenerationString, null));
 			// Set 'Date of Birth'
-			valuesToAddList.add(ct.createObservedValueWithProtocolApplication(invName, weanDate, null,
-					"SetBreedingCageId", "BreedingCageId", animalName, litterBreedingCageIdString, null));
+			// valuesToAddList.add(ct.createObservedValueWithProtocolApplication(invName,
+			// weanDate, null,
+			// "SetBreedingCageId", "BreedingCageId", animalName,
+			// litterBreedingCageIdString, null));
 
 			// Set species
 			if (speciesName != null)
@@ -3436,10 +3466,26 @@ public class Breedingnew extends PluginModel<Entity>
 				db.update(value);
 			}
 
+			// Set generation
+			String breedingcageid = request.getString("6_" + animalCount);
+			value = ct.getObservedValuesByTargetAndFeature(animal.getName(), "BreedingCageId", investigationNames,
+					invName).get(0);
+			value.setValue(breedingcageid);
+			if (value.getProtocolApplication_Id() == null)
+			{
+				String paName1 = ct.makeProtocolApplication(invName, "SetBreedingCageId");
+				value.setProtocolApplication_Name(paName1);
+				db.add(value);
+			}
+			else
+			{
+				db.update(value);
+			}
+
 			// Set genotype(s)
 			for (int genoNr = 0; genoNr < nrOfGenotypes; genoNr++)
 			{
-				int currCol = 6 + (genoNr * 2);
+				int currCol = 7 + (genoNr * 2);
 				String paName = ct.makeProtocolApplication(invName, "SetGenotype");
 				String geneName = request.getString(currCol + "_" + animalCount);
 				if (geneName == null || geneName.equals(""))
