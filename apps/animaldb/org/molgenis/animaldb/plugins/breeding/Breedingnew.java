@@ -965,7 +965,7 @@ public class Breedingnew extends PluginModel<Entity>
 
 					// Set breedingcage id
 					String breedingProtocol = ct.getMostRecentValueAsString(this.line, "LineBreedingProtocol");
-					System.out.println("#######@@@@@@@@@@@@@@" + breedingProtocol);
+					System.out.println("#######@@@@@@@@@@@@@@1" + breedingProtocol);
 					if (breedingProtocol != null && breedingProtocol.equals("rotating"))
 					{
 						System.out.println("#######@@@@@@@@@@@@@@2 Do I get in breedingprot? " + bCIds);
@@ -973,22 +973,27 @@ public class Breedingnew extends PluginModel<Entity>
 						Boolean validBCId = false;
 						if (bCIds.size() > 0)
 						{
+							System.out.println("#######@@@@@@@@@@@@@@3 " + bCIds);
 							bcid = Integer.parseInt(bCIds.get(0));
 							validBCId = true;
 							if (bCIds.size() > 1)
 							{
+								System.out.println("#######@@@@@@@@@@@@@@3 " + bcid);
 								for (int i = 1; i < bCIds.size(); i++)
 								{
+									System.out.println("#######@@@@@@@@@@@@@@4 " + i + bcid);
 									int nextBcid = Integer.parseInt(bCIds.get(i));
 									if (nextBcid != bcid)
 									{
 										validBCId = false;
+										System.out.println("#######@@@@@@@@@@@@@@5 " + i + bcid);
 									}
 								}
 							}
 						}
 						if (validBCId)
 						{
+							System.out.println("#######@@@@@@@@@@@@@@6 " + bcid);
 							int nrbrcages = Integer
 									.parseInt(ct.getMostRecentValueAsString(line, "LineNrBreedingCages"));
 							if (bcid == nrbrcages)
@@ -2545,6 +2550,11 @@ public class Breedingnew extends PluginModel<Entity>
 		}
 
 		// Set BreedingCageId and breeding protocol (
+		if (this.breedingCageId != null)
+		{
+			db.add(ct.createObservedValueWithProtocolApplication(invName, eventDate, null, "SetBreedingCageId",
+					"BreedingCageId", litterName, this.breedingCageId, null));
+		}
 
 		return litterName;
 	}
@@ -2853,13 +2863,13 @@ public class Breedingnew extends PluginModel<Entity>
 			if (litterGenerationString != null)
 			{
 				valuesToAddList.add(ct.createObservedValueWithProtocolApplication(invName, weanDate, null,
-						"SetGeneration", "Generation", animalName, null, litterGenerationString));
+						"SetGeneration", "Generation", animalName, litterGenerationString, null));
 			}
-			// Set generation on animal
+			// Set breeding cage id on animal
 			if (litterBreedingCageIdString != null)
 			{
 				valuesToAddList.add(ct.createObservedValueWithProtocolApplication(invName, weanDate, null,
-						"SetBreedingCageId", "BreedingCageId", animalName, null, litterBreedingCageIdString));
+						"SetBreedingCageId", "BreedingCageId", animalName, litterBreedingCageIdString, null));
 			}
 
 			// Set responsible researcher
