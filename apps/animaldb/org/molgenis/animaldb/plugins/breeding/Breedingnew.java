@@ -2474,7 +2474,8 @@ public class Breedingnew extends PluginModel<Entity>
 	{
 		Date now = new Date();
 
-		setUserFields(request, false);
+		setUserFields(request, false); // get read the molgenisrequest from the
+										// form.
 		Date eventDate = newDateOnlyFormat.parse(birthdate);
 		String userName = this.getLogin().getUserName();
 		String invName = ct.getOwnUserInvestigationNames(userName).get(0);
@@ -2631,13 +2632,19 @@ public class Breedingnew extends PluginModel<Entity>
 
 		}
 		else
+		// add new litter
 		{
+			// birthdate
 			if (request.getString("birthdate") == null || request.getString("birthdate").equals(""))
 			{
 				throw new Exception("Birth date cannot be empty");
 			}
 			birthdate = request.getString("birthdate"); // in old date format!
+
+			// litterSize
 			this.litterSize = request.getInt("littersize");
+
+			// litterSize approximate
 			if (request.getBoolean("sizeapp_toggle") != null)
 			{
 				this.litterSizeApproximate = true;
@@ -2646,7 +2653,16 @@ public class Breedingnew extends PluginModel<Entity>
 			{
 				this.litterSizeApproximate = false;
 			}
+
+			// Generation
+			this.generation = request.getString("littergeneration");
+
+			// BreedingcageId
+			this.breedingCageId = request.getString("litterbreedingcageid");
+
+			// Remarks
 			this.litterRemarks = request.getString("litterremarks");
+
 		}
 	}
 

@@ -276,12 +276,9 @@
 		</div>
 		<div style="float:right">
 		<#if screen.stillToWeanYN>
-		
 			<input type='submit' id='editIndividual' disabled value='Edit individuals in litter' onclick="__action.value='editIndividual'" />
-		
 		<#else>
 			<input type='submit' id='editIndividual' value='Edit individuals in litter' onclick="__action.value='editIndividual'" />
-
 		</#if>
 		</div>
 	<br />
@@ -294,7 +291,7 @@
 		<a href="molgenis.do?__target=${screen.name}&__action=editIndividual&addNew=true"><img id="addIndividualToWeanGroup" title="addIndividualToWeanGroup" alt="addIndividualToWeanGroup" src="generated-res/img/new.png"></a>
 	</div>
 	<!--<input type="image" title="saveIndi" src"generated-res/img/new.png" id='saveIMG' onclick="__action.value='applyLitterIndividuals'" />-->
-		<input type='submit' id='go_back' value='Cancel' onclick="__action.value='EditLitter'" />
+		<input type='submit' id='go_back' value='Cancel' onclick="__action.value='editLitter'" />
 	<div style="float:left">
 		<input type='submit' id='save' value='Save' onclick="__action.value='applyLitterIndividuals'" />
 	</div>
