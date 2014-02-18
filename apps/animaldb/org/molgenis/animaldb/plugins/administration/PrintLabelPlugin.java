@@ -116,7 +116,34 @@ public class PrintLabelPlugin extends EasyPluginController
 		File pdfFile = new File(tmpDir.getAbsolutePath() + File.separatorChar + "cagelabels.pdf");
 		String filename = pdfFile.getName();
 
-		labelGenerator.startDocument(pdfFile);
+		boolean dymoLabels = true;
+		if (request.get("printDymoCageLabels") == null)
+		{
+			dymoLabels = false;
+		}
+		boolean defaultCheckBox = true;
+		if (request.get("printDefaultCageLabel") == null)
+		{
+			defaultCheckBox = false;
+		}
+
+		if (dymoLabels && !defaultCheckBox)
+		{
+			dymoLabels = false;
+			this.setMessages(new ScreenMessage(
+					"The Dymo label layout is only available for the default cage label, Your labels have been created using the alternative A4 template.",
+					true));
+
+		}
+
+		if (dymoLabels)
+		{
+			labelGenerator.startDocument(pdfFile, "Dymo");
+		}
+		else
+		{
+			labelGenerator.startDocument(pdfFile, "A4");
+		}
 
 		List<String> investigationNames = cs.getAllUserInvestigationNames(userName);
 		List<ObservationTarget> individualList = getIndividualsFromUi(db, request);
@@ -129,11 +156,6 @@ public class PrintLabelPlugin extends EasyPluginController
 		int sexctr = 0;
 		List<String> elementLabelList;
 		List<String> elementList;
-		boolean defaultCheckBox = true;
-		if (request.get("printDefaultCageLabel") == null)
-		{
-			defaultCheckBox = false;
-		}
 
 		// if default label is selected
 
@@ -220,7 +242,7 @@ public class PrintLabelPlugin extends EasyPluginController
 				String decInfo = (decNr != null ? decNr : "") + " " + (expNr != null ? expNr : "");
 				elementList.add(decInfo);
 				elementLabelList.add("Remarks");
-				elementList.add("\n\n\n\n\n");
+				elementList.add("");
 			}
 			else
 			{
@@ -246,7 +268,7 @@ public class PrintLabelPlugin extends EasyPluginController
 					elementList.add(actualValue);
 				}
 				elementLabelList.add("Remarks");
-				elementList.add("\n\n\n\n\n");
+				elementList.add("");
 			}
 
 			if (sex.equals(lastSex))
@@ -376,7 +398,7 @@ public class PrintLabelPlugin extends EasyPluginController
 			targetMatrixViewer.setDatabase(db);
 		}
 
-		labelGenerator = new LabelGenerator(2);
+		labelGenerator = new LabelGenerator();
 
 		try
 		{
@@ -420,8 +442,18 @@ public class PrintLabelPlugin extends EasyPluginController
 				false);
 		defOrCustom.setName("printDefaultCageLabel");
 		defOrCustom.setLabel("Use default cagelabel layout");
-
 		panel.add(defOrCustom);
+
+		List<String> layoutOptions = new ArrayList<String>();
+		layoutOptions.add("Dymo");
+		List<String> layoutOptionLabels = new ArrayList<String>();
+		layoutOptionLabels.add("Use Dymo label layout");
+		CheckboxInput labelType = new CheckboxInput("printDymoCageLabels", layoutOptions, layoutOptionLabels, "", null,
+				true, false);
+		labelType.setName("printDymoCageLabels");
+		labelType.setLabel("Create Dymo sticker labels");
+		panel.add(labelType);
+
 		makeFeaturesSelect(db);
 		makePrintButton();
 		container.add(panel);
@@ -443,6 +475,17 @@ public class PrintLabelPlugin extends EasyPluginController
 	{
 		List<String> investigationNames = cs.getAllUserInvestigationNames(db.getLogin().getUserName());
 		List<String> measurementsToShow = new ArrayList<String>();
+		measurementsToShow.add("Active");
+		measurementsToShow.add("Background");
+		measurementsToShow.add("DateOfBirth");
+		measurementsToShow.add("AnimalType");
+		measurementsToShow.add("Earmark");
+		measurementsToShow.add("GeneModification");
+		measurementsToShow.add("GeneState");
+		measurementsToShow.add("Line");
+		measurementsToShow.add("Litter");
+		measurementsToShow.add("Location");
+		measurementsToShow.add("Sex");
 		measurementsToShow.add("Species");
 		List<MatrixQueryRule> filterRules = new ArrayList<MatrixQueryRule>();
 		filterRules.add(new MatrixQueryRule(MatrixQueryRule.Type.rowHeader, Individual.INVESTIGATION_NAME, Operator.IN,
@@ -501,6 +544,16 @@ public class PrintLabelPlugin extends EasyPluginController
 	 * Create the Print button.
 	 */
 	private void makePrintButton()
+	{
+		printButton = new ActionInput("Print", "", "Print");
+		printButton.setIcon("dymo_32.png");
+		panel.add(printButton);
+	}
+
+	/**
+	 * Create the Print button.
+	 */
+	private void creatDymoPrintButton()
 	{
 		printButton = new ActionInput("Print", "", "Print");
 		panel.add(printButton);
