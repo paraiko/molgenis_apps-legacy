@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import org.apache.xpath.operations.String;
 import org.molgenis.animaldb.commonservice.CommonService;
 import org.molgenis.framework.db.Database;
 import org.molgenis.framework.db.DatabaseException;
@@ -868,9 +869,17 @@ public class AddAnimalPlugin extends EasyPluginController
 		{
 			defaultPrefix = "cp_";
 		}
+		if (speciesName.equals("Brazilian Guinea pig"))
+		{
+			defaultPrefix = "ca_";
+		}
 		if (speciesName.equals("Fat-tailed dunnart"))
 		{
 			defaultPrefix = "sg_";
+		}
+		if (speciesName.equals("Northern treeshrew"))
+		{
+			defaultPrefix = "tb_";
 		}
 
 		List<String> bases = ct.getPrefixes("animal");
