@@ -880,6 +880,10 @@ public class AddAnimalPlugin extends EasyPluginController
 		{
 			defaultPrefix = "tb_";
 		}
+		if (speciesName.equals("Garden dormouse"))
+		{
+			defaultPrefix = "eq_";
+		}
 
 		List<String> bases = ct.getPrefixes("animal");
 		namebase = new SelectInput("namebase");
