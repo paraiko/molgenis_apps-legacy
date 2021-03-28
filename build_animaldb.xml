@@ -50,7 +50,7 @@
 	</target>
 	
 	<target name="runOn" description="Start the application">
-	    <java maxmemory="512m" classname="boot.RunStandalone" fork="yes" failonerror="true">
+	    <java maxmemory="2048m" classname="boot.RunStandalone" fork="yes" failonerror="true">
 	        <arg value="${port}"/>
 	        <classpath>
 	            <path refid="molgenis.classpath" />
@@ -70,7 +70,7 @@
 	
 			<!-- compile the generated results, use fork to run it with its own memory settings -->
 			<!-- NB: under Windows, forking works only if the javac path is in your PATH variable -->
-			<javac fork="true" srcdir="${output_src}:${app_src}" destdir="${build.molgenis_apps.dir}" nowarn="on" memoryinitialsize="256m" memorymaximumsize="512m" debug="true">
+			<javac fork="true" srcdir="${output_src}:${app_src}" destdir="${build.molgenis_apps.dir}" nowarn="on" memoryinitialsize="1024m" memorymaximumsize="2048m" debug="true">
 				<classpath refid="molgenis.classpath" />
 				
 				<exclude name="**/BinaryTupleTable.java" />

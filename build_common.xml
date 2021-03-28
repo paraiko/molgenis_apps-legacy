@@ -163,7 +163,7 @@ It should be used via 'import' plus passing of properties
 
 		<!-- compile the generated results, use fork to run it with its own memory settings -->
 		<!-- NB: under Windows, forking works only if the javac path is in your PATH variable -->
-		<javac fork="true" srcdir="${output_src}:${app_src}" destdir="${build.molgenis_apps.dir}" nowarn="on" memoryinitialsize="512m" memorymaximumsize="1024m" debug="true" includeantruntime="false">
+		<javac fork="true" srcdir="${output_src}:${app_src}" destdir="${build.molgenis_apps.dir}" nowarn="on" memoryinitialsize="1024m" memorymaximumsize="2048m" debug="true" includeantruntime="false">
 			<classpath refid="molgenis.classpath" />
 		</javac>
 
@@ -220,7 +220,7 @@ It should be used via 'import' plus passing of properties
 
    		<findbugs home="${findbugs.home}" 
        		output="xml" outputFile="${basedir}/dist/findbugs.xml"
-       		jvmargs="-Xms1024M -Xmx1024M ">
+       		jvmargs="-Xms1024M -Xmx2048M ">
       		<!--
       		<sourcePath path="${molgenis.dir}/src" />
       		-->
@@ -497,7 +497,7 @@ It should be used via 'import' plus passing of properties
 	<target name="download-jars">
 		<echo message="installing ivy.." />
 		<mkdir dir="WebContent/WEB-INF/lib" />
-		<get src="http://repo1.maven.org/maven2/org/apache/ivy/ivy/2.0.0/ivy-2.0.0.jar" dest="WebContent/WEB-INF/lib/ivy.jar" usetimestamp="true" />
+		<get src="https://repo1.maven.org/maven2/org/apache/ivy/ivy/2.5.0/ivy-2.5.0.jar" dest="WebContent/WEB-INF/lib/ivy.jar" usetimestamp="true" />
 		<path id="ivy.lib.path">
 			<fileset dir="${lib.dir}" includes="ivy.jar"/>
 		</path>
@@ -505,8 +505,8 @@ It should be used via 'import' plus passing of properties
 
 		<echo message="resolving dependecies ..." />
 
-		<ivy:retrieve pattern="${lib.dir}/[artifact].[ext]" type="jar,bundle" sync="true" />
-
+		<ivy:retrieve pattern="${lib.dir}/[artifact]-[type]-[revision].[ext]" type="jar,bundle" sync="true" />
+		<!-- <ivy:retrieve pattern="${lib.dir}/[artifact].[ext]" type="jar,bundle" sync="true" /> -->
 	</target>
 
 </project>
